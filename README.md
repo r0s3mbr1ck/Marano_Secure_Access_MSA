@@ -1,6 +1,6 @@
 # 🛡️ OpenVPN Community Full Setup with Proxmox + LXC + CLI/Web Management Panel
 <p align="center">
-  <img src="docs/images/cover.gif" width="900"/>
+  <img src="docs/images/cover.png" width="900"/>
 </p>
 ---
 
