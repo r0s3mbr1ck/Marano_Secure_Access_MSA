@@ -2,7 +2,6 @@
 <p align="center">
   <img src="docs/images/cover.png" width="900"/>
 </p>
----
 
 ## 📌 Overview
 
