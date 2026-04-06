@@ -1,84 +1,114 @@
-# 🛡️ OpenVPN Community Full Setup with Proxmox + LXC + CLI/Web Management Panel
+# 🛡️ OpenVPN Self-Hosted Platform with Proxmox + LXC + CLI + Web Panel + Telegram Integration
+
 <p align="center">
   <img src="docs/images/cover.png" width="900"/>
 </p>
 
-## 📌 Overview
-
-This project provides a **fully self-hosted OpenVPN Community deployment** running inside a Proxmox LXC container, with both:
-
-* CLI management (automation + operations)
-* Web panel (Flask-based dashboard)
-
-The goal is to deliver a **scalable VPN solution without artificial limitations**, unlike OpenVPN Access Server free tier.
+<p align="center">
+  <b>Fully self-hosted OpenVPN platform with Web UI, CLI automation and no user limits</b>
+</p>
 
 ---
 
-## 🎯 Why this project exists
+## 🚀 Badges
 
-This project was built to create a **real-world, self-hosted VPN platform** with:
+<p align="center">
 
-* full infrastructure ownership
-* certificate-based authentication
-* PKI lifecycle control (Easy-RSA)
+![OpenVPN](https://img.shields.io/badge/OpenVPN-Community-orange)
+![Platform](https://img.shields.io/badge/Platform-Proxmox-blue)
+![Language](https://img.shields.io/badge/Python-Flask-green)
+![License](https://img.shields.io/badge/License-MIT-lightgrey)
+![Status](https://img.shields.io/badge/Status-Active-success)
+
+</p>
+
+---
+
+# 📌 Overview
+
+This project delivers a **fully self-hosted OpenVPN platform** designed for:
+
+* homelabs
+* cyber training environments
+* internal infrastructure
+* controlled enterprise scenarios
+
+It combines:
+
+* OpenVPN Community Edition
+* Easy-RSA PKI
+* CLI automation (full lifecycle management)
+* Web dashboard (Flask-based UI)
+* Telegram integration for `.ovpn` delivery
+
+👉 **No artificial connection limits. No vendor lock-in. Full control.**
+
+---
+
+# 🎯 Why this project exists
+
+Most self-hosted VPN solutions:
+
+* limit concurrent users
+* hide internal PKI
+* restrict automation
+
+This project solves that by providing:
+
+* full PKI ownership
+* certificate lifecycle control
 * unlimited simultaneous connections
-* CLI + Web management interface
-* Telegram `.ovpn` delivery
-* Proxmox + LAN integration
+* operational simplicity (CLI + Web)
+* automation-ready design
 
-👉 **No artificial user limits. No vendor lock-in. Full control.**
+👉 **Built for real-world operators, not just lab demos.**
 
 ---
 
-## 🌐 Real-world scenario (important)
+# 🧭 Deployment Flow
 
-This setup was built in a **home/lab environment**, where:
+```text
+1. Install OpenVPN
+2. Configure PKI (Easy-RSA)
+3. Start VPN server
+4. (Optional) Use CLI automation
+5. Deploy Web Panel
+6. (Optional) Add Nginx reverse proxy
+```
 
-* there is **no public static IP**
-* a **DDNS service** is used
-* router performs:
+---
 
-  * UDP **port forwarding (1194)**
-  * NAT
+# 🌐 Real-world scenario (Important)
+
+This project was implemented in a **home/lab environment**:
+
+* No public static IP
+* DDNS used
+* Router performing NAT + port forwarding
 
 ```text
 Internet
    |
 [ ISP Router ]
   - DDNS → yourdomain.ddns.net
-  - Port Forward UDP 1194 → VPN Server
+  - UDP 1194 → forwarded
    |
-[ Proxmox ]
+[ Proxmox Host ]
    |
-[ OpenVPN LXC ]
+[ OpenVPN LXC Container ]
+  - eth0 → LAN
+  - tun0 → VPN
 ```
 
-⚠️ Adapt this to your environment:
+⚠️ Adapt for:
 
-* cloud VM
-* public IP
-* enterprise firewall
-* reverse proxy
-
----
-
-## 🚀 Features
-
-* OpenVPN Community server
-* Easy-RSA PKI
-* CLI management script
-* Web panel (Flask)
-* Telegram integration
-* Batch client creation
-* Certificate revocation (CRL)
-* Connected clients monitoring
-* `.ovpn` generation
-* LAN routing
-* Sidebar-based UI
+* cloud environments
+* static IP setups
+* enterprise firewalls
 
 ---
 
-## 📸 Screenshots
+# 📸 Screenshots
 
 ### CLI
 
@@ -102,7 +132,7 @@ Internet
 
 ---
 
-## 🧪 Tested Environment
+# 🧪 Tested Environment
 
 * Proxmox VE
 * Ubuntu 22 LXC
@@ -114,76 +144,9 @@ Internet
 
 ---
 
-# ⚡ Quick Start (Web Panel)
+# 📦 Base Installation (OpenVPN)
 
-## 1. Clone repository
-
-```bash
-git clone https://github.com/r0s3mbr1ck/OVPN_Self_Hosted.git
-cd OVPN_Self_Hosted
-```
-
----
-
-## 2. Create virtual environment
-
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
----
-
-## 3. Install dependencies
-
-```bash
-pip install --upgrade pip
-pip install -r requirements.txt
-```
-
----
-
-## 4. Configure environment variables
-
-```bash
-nano /root/.config/ovpn-menu.env
-```
-
-```bash
-export OVPN_WEB_SECRET='CHANGE_ME'
-export OVPN_TG_BOT_TOKEN='CHANGE_ME'
-export OVPN_TG_CHAT_ID='CHANGE_ME'
-```
-
----
-
-## 5. Run the web panel
-
-```bash
-python3 app.py
-```
-
-Access:
-
-```text
-http://127.0.0.1:8080
-```
-
----
-
-## ⚠️ Requirements
-
-This project assumes OpenVPN is already installed and configured:
-
-```text
-/etc/openvpn/
-/etc/openvpn/easy-rsa/
-/etc/openvpn/client-configs/
-```
-
----
-
-# 📦 Installation (OpenVPN)
+## Install packages
 
 ```bash
 apt update
@@ -214,9 +177,7 @@ chmod 644 /etc/openvpn/crl.pem
 
 ---
 
-# ⚙️ OpenVPN Server Config
-
-File:
+# ⚙️ OpenVPN Server
 
 ```text
 /etc/openvpn/server.conf
@@ -235,7 +196,7 @@ netfilter-persistent save
 
 ---
 
-# ▶️ Service
+# ▶️ Start Service
 
 ```bash
 systemctl enable openvpn@server
@@ -252,14 +213,14 @@ Script:
 scripts/ovpn-menu.sh
 ```
 
-### Features
+## Capabilities
 
 * client creation
 * `.ovpn` generation
 * revoke (CN / ID / range)
-* registry with TTL
+* TTL-based registry
 * Telegram export
-* logs + health
+* logs + health checks
 
 ---
 
@@ -273,22 +234,61 @@ scripts/ovpn-menu.sh
 * Revocation
 * Logs
 * Health check
-* Telegram export
-* Sidebar navigation
+* Telegram integration
+* Sidebar UI
 
 ---
 
-## ⚙️ Run
+# ⚡ Quick Start (Web Panel)
+
+## Clone repository
+
+```bash
+git clone https://github.com/r0s3mbr1ck/OVPN_Self_Hosted.git
+cd OVPN_Self_Hosted
+```
+
+---
+
+## Setup environment
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+---
+
+## Configure variables
+
+```bash
+nano /root/.config/ovpn-menu.env
+```
+
+```bash
+export OVPN_WEB_SECRET='CHANGE_ME'
+export OVPN_TG_BOT_TOKEN='CHANGE_ME'
+export OVPN_TG_CHAT_ID='CHANGE_ME'
+```
+
+---
+
+## Run
 
 ```bash
 python3 app.py
 ```
 
+Access:
+
+```text
+http://127.0.0.1:8080
+```
+
 ---
 
 # 🌍 Nginx Reverse Proxy
-
-Example:
 
 ```nginx
 server {
@@ -303,16 +303,9 @@ server {
 }
 ```
 
-Enable:
-
-```bash
-nginx -t
-systemctl reload nginx
-```
-
 ---
 
-## 🔁 Redirect IP → Domain (optional)
+## Redirect IP → Domain
 
 ```nginx
 server {
@@ -335,24 +328,21 @@ server {
 ├── static/
 ├── scripts/
 │   └── ovpn-menu.sh
-├── docs/
-│   └── images/
+├── docs/images/
 ├── examples/
-│   ├── server.conf.example
-│   ├── base.conf.example
-│   ├── ovpn-web-service.service.example
-│   └── ovpn-menu.env.example
+└── venv/
 ```
 
 ---
 
-# ⚙️ Optional: Run as systemd service
+# 📁 Example Files
 
-```bash
-cp examples/ovpn-web-service.service.example /etc/systemd/system/ovpn-web.service
-
-systemctl daemon-reload
-systemctl enable --now ovpn-web.service
+```text
+examples/
+├── server.conf.example
+├── base.conf.example
+├── ovpn-web-service.service.example
+├── ovpn-menu.env.example
 ```
 
 ---
@@ -369,19 +359,16 @@ systemctl enable --now ovpn-web.service
 
 # 🧠 Final Notes
 
-This project is ideal for:
+This project provides:
 
-* homelabs
-* cyber labs
-* internal networks
-* training environments
+* a complete self-hosted VPN stack
+* automation + UI
+* scalability without licensing limits
 
-👉 Fully self-hosted
-👉 Scalable
-👉 No vendor lock-in
+👉 Ideal for labs, training environments, and internal infrastructure.
 
 ---
 
 # 🚀 Next Step
 
-👉 Docker version (recommended for portability)
+👉 Docker version (1-command deployment)
