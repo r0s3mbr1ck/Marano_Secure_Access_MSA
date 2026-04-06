@@ -325,5 +325,3 @@ This project is ideal for:
 👉 No vendor lock-in
 
 ````
-
----
