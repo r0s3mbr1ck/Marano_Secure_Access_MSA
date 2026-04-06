@@ -43,6 +43,14 @@ It combines:
 
 👉 **No artificial connection limits. No vendor lock-in. Full control.**
 
+</div>
+
+> [!IMPORTANT]
+> The script may have execution errors, translation issues, and opportunities for visual improvements. Contribute!
+
+<div align="center">
+
+  
 ---
 
 # 🎯 Why this project exists
