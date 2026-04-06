@@ -148,6 +148,12 @@ Internet
 
 ---
 
+> [!note]
+> 🔐 Certificate-based authentication is fully functional.  
+> 🚧 Hybrid authentication (certificate + username/password) is under active development.
+
+---
+
 # 📦 Base Installation (OpenVPN)
 
 ## Install packages
