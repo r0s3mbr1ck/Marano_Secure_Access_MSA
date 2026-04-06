@@ -375,4 +375,16 @@ This project provides:
 
 # 🚀 Next Step
 
+👉 Full Web Panel automation (Auth profile creation)
+
+👉 Password lifecycle enforcement (mandatory change on first login)
+
+👉 Hybrid authentication hardening (certificate + password)
+
+👉 Automated profile distribution (Telegram / Email / QR Code)
+
+👉 Web UI improvements (UX, validation, password tools)
+
+👉 Security hardening (HTTPS, access control, auditing)
+
 👉 Docker version (1-command deployment)
