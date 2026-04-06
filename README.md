@@ -1,6 +1,3 @@
-Perfeito — já vi tua estrutura (`docs/images/...`) e os nomes dos arquivos.
-Vou te devolver o **README pronto**, já corrigido com as imagens reais que você subiu 👇
-
 ---
 
 # 🛡️ OpenVPN Community Full Setup
