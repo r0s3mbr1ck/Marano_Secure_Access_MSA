@@ -1,5 +1,4 @@
-# 🛡️ OpenVPN Community Full Setup
-## Proxmox + LXC + CLI/Web Management Panel
+# 🛡️ OpenVPN Community Full Setup with Proxmox + LXC + CLI/Web Management Panel
 
 ---
 
