@@ -4,25 +4,28 @@
 
 ## 📌 Overview
 
-This project documents a full self-hosted OpenVPN Community deployment running inside a dedicated LXC container on Proxmox VE, with both CLI and Web Panel management.
+This project provides a **fully self-hosted OpenVPN Community deployment** running inside a Proxmox LXC container, with both:
 
-The goal is to provide a scalable, fully controlled VPN solution without the limitations of OpenVPN Access Server free tier.
+* CLI management (automation + operations)
+* Web panel (Flask-based dashboard)
+
+The goal is to deliver a **scalable VPN solution without artificial limitations**, unlike OpenVPN Access Server free tier.
 
 ---
 
 ## 🎯 Why this project exists
 
-This project was created to build a **fully self-hosted VPN platform** with:
+This project was built to create a **real-world, self-hosted VPN platform** with:
 
-- full infrastructure ownership  
-- certificate-based authentication  
-- PKI lifecycle control  
-- unlimited simultaneous connections  
-- CLI + Web management  
-- Telegram `.ovpn` delivery  
-- Proxmox + LAN integration  
+* full infrastructure ownership
+* certificate-based authentication
+* PKI lifecycle control (Easy-RSA)
+* unlimited simultaneous connections
+* CLI + Web management interface
+* Telegram `.ovpn` delivery
+* Proxmox + LAN integration
 
-👉 **No artificial user limits. Full control.**
+👉 **No artificial user limits. No vendor lock-in. Full control.**
 
 ---
 
@@ -30,11 +33,12 @@ This project was created to build a **fully self-hosted VPN platform** with:
 
 This setup was built in a **home/lab environment**, where:
 
-- there is **no public static IP**
-- a **DDNS service** is used
-- the router performs:
-  - UDP **port forwarding (1194)**
-  - NAT
+* there is **no public static IP**
+* a **DDNS service** is used
+* router performs:
+
+  * UDP **port forwarding (1194)**
+  * NAT
 
 ```text
 Internet
@@ -46,14 +50,14 @@ Internet
 [ Proxmox ]
    |
 [ OpenVPN LXC ]
-````
+```
 
 ⚠️ Adapt this to your environment:
 
 * cloud VM
-* static IP
-* reverse proxy
+* public IP
 * enterprise firewall
+* reverse proxy
 
 ---
 
@@ -109,7 +113,76 @@ Internet
 
 ---
 
-## 📦 Installation
+# ⚡ Quick Start (Web Panel)
+
+## 1. Clone repository
+
+```bash
+git clone https://github.com/r0s3mbr1ck/OVPN_Self_Hosted.git
+cd OVPN_Self_Hosted
+```
+
+---
+
+## 2. Create virtual environment
+
+```bash
+python3 -m venv venv
+source venv/bin/activate
+```
+
+---
+
+## 3. Install dependencies
+
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+
+---
+
+## 4. Configure environment variables
+
+```bash
+nano /root/.config/ovpn-menu.env
+```
+
+```bash
+export OVPN_WEB_SECRET='CHANGE_ME'
+export OVPN_TG_BOT_TOKEN='CHANGE_ME'
+export OVPN_TG_CHAT_ID='CHANGE_ME'
+```
+
+---
+
+## 5. Run the web panel
+
+```bash
+python3 app.py
+```
+
+Access:
+
+```text
+http://127.0.0.1:8080
+```
+
+---
+
+## ⚠️ Requirements
+
+This project assumes OpenVPN is already installed and configured:
+
+```text
+/etc/openvpn/
+/etc/openvpn/easy-rsa/
+/etc/openvpn/client-configs/
+```
+
+---
+
+# 📦 Installation (OpenVPN)
 
 ```bash
 apt update
@@ -118,7 +191,7 @@ apt install -y openvpn easy-rsa iptables-persistent python3 python3-pip nginx cu
 
 ---
 
-## 🔐 PKI Setup (Easy-RSA)
+# 🔐 PKI Setup (Easy-RSA)
 
 ```bash
 make-cadir /etc/openvpn/easy-rsa
@@ -140,7 +213,7 @@ chmod 644 /etc/openvpn/crl.pem
 
 ---
 
-## ⚙️ OpenVPN Server Config
+# ⚙️ OpenVPN Server Config
 
 File:
 
@@ -150,7 +223,7 @@ File:
 
 ---
 
-## 🔁 NAT & Forwarding
+# 🔁 NAT & Forwarding
 
 ```bash
 sysctl -w net.ipv4.ip_forward=1
@@ -161,7 +234,7 @@ netfilter-persistent save
 
 ---
 
-## ▶️ Service
+# ▶️ Service
 
 ```bash
 systemctl enable openvpn@server
@@ -172,18 +245,18 @@ systemctl start openvpn@server
 
 # 💻 CLI Management
 
-Script location:
+Script:
 
 ```text
 scripts/ovpn-menu.sh
 ```
 
-Features:
+### Features
 
-* create clients
-* generate `.ovpn`
-* revoke by CN / ID / range
-* registry tracking
+* client creation
+* `.ovpn` generation
+* revoke (CN / ID / range)
+* registry with TTL
 * Telegram export
 * logs + health
 
@@ -204,43 +277,22 @@ Features:
 
 ---
 
-## ⚙️ Setup
+## ⚙️ Run
 
 ```bash
-cd /opt/ovpn-web-panel
-python3 -m venv venv
-source venv/bin/activate
-pip install flask
-
 python3 app.py
 ```
 
-Access:
-
-```text
-http://127.0.0.1:8080
-```
-
 ---
 
-## 🔐 Environment Variables
+# 🌍 Nginx Reverse Proxy
 
-```bash
-export OVPN_WEB_SECRET='CHANGE_ME'
-export OVPN_TG_BOT_TOKEN='CHANGE_ME'
-export OVPN_TG_CHAT_ID='CHANGE_ME'
-```
-
----
-
-# 🌍 Nginx (Reverse Proxy)
-
-Example config:
+Example:
 
 ```nginx
 server {
     listen 80;
-    server_name CHANGE_ME.local;
+    server_name vpn.yourdomain.local;
 
     location / {
         proxy_pass http://127.0.0.1:8080;
@@ -265,42 +317,46 @@ systemctl reload nginx
 server {
     listen 80;
     server_name 192.168.XX.XX;
-    return 301 http://CHANGE_ME$request_uri;
+    return 301 http://vpn.yourdomain.local$request_uri;
 }
 ```
 
 ---
 
-## 📁 Project Structure
+# 📁 Project Structure
 
 ```text
 .
 ├── README.md
 ├── app.py
+├── requirements.txt
 ├── templates/
 ├── static/
 ├── scripts/
 │   └── ovpn-menu.sh
-├── docs/images/
+├── docs/
+│   └── images/
 ├── examples/
-└── requirements.txt
+│   ├── server.conf.example
+│   ├── base.conf.example
+│   ├── ovpn-web-service.service.example
+│   └── ovpn-menu.env.example
 ```
 
 ---
 
-## 📁 Example Files
+# ⚙️ Optional: Run as systemd service
 
-```text
-examples/
-├── server.conf.example
-├── base.conf.example
-├── ovpn-web-service.service.example
-└── ovpn-menu.env.example
+```bash
+cp examples/ovpn-web-service.service.example /etc/systemd/system/ovpn-web.service
+
+systemctl daemon-reload
+systemctl enable --now ovpn-web.service
 ```
 
 ---
 
-## 🔐 Security Notes
+# 🔐 Security Notes
 
 * Use HTTPS if exposed externally
 * Restrict access to the panel
@@ -310,17 +366,21 @@ examples/
 
 ---
 
-## 🧠 Final Notes
+# 🧠 Final Notes
 
 This project is ideal for:
 
 * homelabs
-* cyber training labs
+* cyber labs
 * internal networks
-* controlled environments
+* training environments
 
 👉 Fully self-hosted
 👉 Scalable
 👉 No vendor lock-in
 
-````
+---
+
+# 🚀 Next Step
+
+👉 Docker version (recommended for portability)
