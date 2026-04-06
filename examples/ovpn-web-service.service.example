@@ -1,0 +1,13 @@
+[Unit]
+Description=OpenVPN Web Panel
+After=network.target
+
+[Service]
+User=root
+WorkingDirectory=/opt/ovpn-web-panel
+Environment="PATH=/opt/ovpn-web-panel/venv/bin"
+ExecStart=/opt/ovpn-web-panel/venv/bin/python3 app.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
