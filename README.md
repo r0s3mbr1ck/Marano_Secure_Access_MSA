@@ -1,7 +1,4 @@
----
-
 # 🛡️ OpenVPN Community Full Setup
-
 ## Proxmox + LXC + CLI/Web Management Panel
 
 ---
@@ -10,71 +7,92 @@
 
 This project documents a full self-hosted OpenVPN Community deployment running inside a dedicated LXC container on Proxmox VE, with both CLI and Web Panel management.
 
-The main goal is to provide a scalable and fully controlled VPN solution based on OpenVPN Community Edition, avoiding the connection limits of the free Access Server tier and keeping the whole stack self-hosted and customizable.
+The goal is to provide a scalable, fully controlled VPN solution without the limitations of OpenVPN Access Server free tier.
 
 ---
 
 ## 🎯 Why this project exists
 
-This project was built to create a practical alternative to limited self-hosted VPN offerings by using OpenVPN Community Edition with:
+This project was created to build a **fully self-hosted VPN platform** with:
 
-* full infrastructure ownership
-* certificate-based authentication
-* self-hosted PKI lifecycle control
-* unlimited simultaneous connections
-* web and CLI operational management
-* Telegram-based `.ovpn` delivery
-* easy integration with Proxmox, DNS and LAN
+- full infrastructure ownership  
+- certificate-based authentication  
+- PKI lifecycle control  
+- unlimited simultaneous connections  
+- CLI + Web management  
+- Telegram `.ovpn` delivery  
+- Proxmox + LAN integration  
 
-👉 **Goal:**
-Build a **fully self-hosted VPN platform** without artificial user limits, keeping everything under your control.
+👉 **No artificial user limits. Full control.**
 
 ---
 
-## 🚀 Key Features
+## 🌐 Real-world scenario (important)
 
-* OpenVPN Community Edition server
-* LXC container on Proxmox
-* Easy-RSA PKI lifecycle
-* Client creation (manual & batch)
-* Certificate revocation + CRL automation
+This setup was built in a **home/lab environment**, where:
+
+- there is **no public static IP**
+- a **DDNS service** is used
+- the router performs:
+  - UDP **port forwarding (1194)**
+  - NAT
+
+```text
+Internet
+   |
+[ ISP Router ]
+  - DDNS → yourdomain.ddns.net
+  - Port Forward UDP 1194 → VPN Server
+   |
+[ Proxmox ]
+   |
+[ OpenVPN LXC ]
+````
+
+⚠️ Adapt this to your environment:
+
+* cloud VM
+* static IP
+* reverse proxy
+* enterprise firewall
+
+---
+
+## 🚀 Features
+
+* OpenVPN Community server
+* Easy-RSA PKI
+* CLI management script
+* Web panel (Flask)
+* Telegram integration
+* Batch client creation
+* Certificate revocation (CRL)
 * Connected clients monitoring
-* `.ovpn` profile generation
-* Telegram bot integration
-* Web dashboard (Flask)
-* CLI management menu
-* LAN routing through VPN
-* Fully self-hosted architecture
+* `.ovpn` generation
+* LAN routing
+* Sidebar-based UI
 
 ---
 
 ## 📸 Screenshots
 
-### 🖥️ CLI Version
+### CLI
 
 ![CLI](docs/images/cli.png)
 
----
-
-### 🌐 Web Dashboard
+### Dashboard
 
 ![Dashboard](docs/images/dashboard_webpage.png)
 
----
+### Connected Clients
 
-### 📡 Connected Clients
+![Connected](docs/images/connected_clients.png)
 
-![Connected Clients](docs/images/connected_clients.png)
-
----
-
-### 📂 Sidebar Navigation
+### Sidebar
 
 ![Sidebar](docs/images/dashboard_webpage_sidebar.png)
 
----
-
-### 📜 Logs View
+### Logs
 
 ![Logs](docs/images/logs.png)
 
@@ -88,60 +106,7 @@ Build a **fully self-hosted VPN platform** without artificial user limits, keepi
 * Easy-RSA
 * Python 3 + Flask
 * Nginx
-* systemd
 * iptables
-
-> Also works on VMs (Proxmox, VMware, VirtualBox, KVM).
-
----
-
-## ⚠️ Important Notes
-
-* Replace all `CHANGE`, `XX` placeholders
-* Do NOT commit:
-
-  * private keys
-  * `.ovpn` files
-  * Telegram tokens
-
----
-
-## 🌐 Architecture
-
-```text
-Internet
-   |
-[ ISP Router ]
-  - UDP 1194 → 192.168.XX.XX
-  - DDNS
-   |
-[ Proxmox Host ]
-   |
-[ OpenVPN LXC ]
-  - eth0: 192.168.XX.XX
-  - tun0: 10.8.XX.1
-```
-
----
-
-## 📦 Installed Components
-
-* OpenVPN Community
-* Easy-RSA
-* Python 3 + Flask
-* curl (Telegram API)
-* systemd
-* iptables
-
----
-
-## ⚙️ Proxmox Preparation
-
-```bash
-pct stop ID_CT
-pct set ID_CT -mp0 /dev/net/tun,mp=/dev/net/tun
-pct start ID_CT
-```
 
 ---
 
@@ -156,37 +121,19 @@ apt install -y openvpn easy-rsa iptables-persistent python3 python3-pip nginx cu
 
 ## 🔐 PKI Setup (Easy-RSA)
 
-### Initialize
-
 ```bash
 make-cadir /etc/openvpn/easy-rsa
 cd /etc/openvpn/easy-rsa
+
 ./easyrsa init-pki
-```
-
-### Create CA
-
-```bash
 ./easyrsa build-ca nopass
-```
 
-### Server cert
-
-```bash
 ./easyrsa gen-req server nopass
 ./easyrsa sign-req server server
 ./easyrsa gen-dh
-```
 
-### TLS key
-
-```bash
 openvpn --genkey tls-crypt /etc/openvpn/tc.key
-```
 
-### CRL
-
-```bash
 ./easyrsa gen-crl
 cp pki/crl.pem /etc/openvpn/
 chmod 644 /etc/openvpn/crl.pem
@@ -196,26 +143,10 @@ chmod 644 /etc/openvpn/crl.pem
 
 ## ⚙️ OpenVPN Server Config
 
-```conf
-port 1194
-proto udp
-dev tun
+File:
 
-server 10.8.XX.0 255.255.255.0
-
-ca /etc/openvpn/ca.crt
-cert /etc/openvpn/server.crt
-key /etc/openvpn/server.key
-
-tls-crypt /etc/openvpn/tc.key
-
-cipher AES-256-GCM
-auth SHA256
-
-status /var/log/openvpn/status.log
-crl-verify /etc/openvpn/crl.pem
-
-push "route 192.168.XX.0 255.255.255.0"
+```text
+/etc/openvpn/server.conf
 ```
 
 ---
@@ -225,7 +156,7 @@ push "route 192.168.XX.0 255.255.255.0"
 ```bash
 sysctl -w net.ipv4.ip_forward=1
 
-iptables -t nat -A POSTROUTING -s 10.8.XX.0/24 -o eth0 -j MASQUERADE
+iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE
 netfilter-persistent save
 ```
 
@@ -240,77 +171,48 @@ systemctl start openvpn@server
 
 ---
 
-## 👤 Client Creation
+# 💻 CLI Management
 
-```bash
-./easyrsa gen-req client-phone nopass
-./easyrsa sign-req client client-phone
+Script location:
+
+```text
+scripts/ovpn-menu.sh
 ```
+
+Features:
+
+* create clients
+* generate `.ovpn`
+* revoke by CN / ID / range
+* registry tracking
+* Telegram export
+* logs + health
 
 ---
 
-## 📁 Profiles
-
-```bash
-/etc/openvpn/client-configs/make-ovpn.sh client-phone
-```
-
----
-
-## 📊 Monitoring
-
-```bash
-cat /var/log/openvpn/status.log
-```
-
----
-
-## ❌ Revoke Client
-
-```bash
-./easyrsa revoke client-phone
-./easyrsa gen-crl
-systemctl restart openvpn@server
-```
-
----
-
-# 🖥️ Web Panel
+# 🌐 Web Panel
 
 ## Features
 
-* Dashboard (KPIs)
+* Dashboard
 * Connected clients
-* Certificate management
-* Batch operations
-* Telegram export
+* Client management
+* Revocation
 * Logs
 * Health check
+* Telegram export
 * Sidebar navigation
-
----
-
-## 📂 Project Structure
-
-```text
-ovpn-web-panel/
-├── app.py
-├── requirements.txt
-├── templates/
-├── static/
-├── docs/images/
-├── examples/
-└── scripts/
-```
 
 ---
 
 ## ⚙️ Setup
 
 ```bash
+cd /opt/ovpn-web-panel
 python3 -m venv venv
 source venv/bin/activate
 pip install flask
+
 python3 app.py
 ```
 
@@ -330,40 +232,47 @@ export OVPN_TG_BOT_TOKEN='CHANGE_ME'
 export OVPN_TG_CHAT_ID='CHANGE_ME'
 ```
 
-✔ Telegram integration já está implementada no projeto
-
 ---
 
-## ⚙️ systemd Service
+# 🌍 Nginx (Reverse Proxy)
 
-```ini
-[Service]
-ExecStart=/opt/ovpn-web-panel/venv/bin/python3 app.py
+Example config:
+
+```nginx
+server {
+    listen 80;
+    server_name CHANGE_ME.local;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+```
+
+Enable:
+
+```bash
+nginx -t
+systemctl reload nginx
 ```
 
 ---
 
-## 🌍 Nginx
+## 🔁 Redirect IP → Domain (optional)
 
 ```nginx
-location / {
-    proxy_pass http://127.0.0.1:8080;
+server {
+    listen 80;
+    server_name 192.168.XX.XX;
+    return 301 http://CHANGE_ME$request_uri;
 }
 ```
 
 ---
 
-## 🔐 Security Notes
-
-* Use HTTPS if the panel is exposed externally  
-* Restrict access to the web panel  
-* Use one certificate per device  
-* Revoke compromised devices immediately  
-* Never publish `.ovpn` files or private keys
-
----
-
-## 📦 Repository Structure
+## 📁 Project Structure
 
 ```text
 .
@@ -372,9 +281,33 @@ location / {
 ├── templates/
 ├── static/
 ├── scripts/
+│   └── ovpn-menu.sh
 ├── docs/images/
-└── examples/
+├── examples/
+└── requirements.txt
 ```
+
+---
+
+## 📁 Example Files
+
+```text
+examples/
+├── server.conf.example
+├── base.conf.example
+├── ovpn-web-service.service.example
+└── ovpn-menu.env.example
+```
+
+---
+
+## 🔐 Security Notes
+
+* Use HTTPS if exposed externally
+* Restrict access to the panel
+* One certificate per device
+* Revoke compromised devices immediately
+* Never publish `.ovpn` files or private keys
 
 ---
 
@@ -383,14 +316,14 @@ location / {
 This project is ideal for:
 
 * homelabs
-* internal infrastructure
 * cyber training labs
+* internal networks
 * controlled environments
 
-👉 It gives you:
+👉 Fully self-hosted
+👉 Scalable
+👉 No vendor lock-in
 
-* full control
-* scalability
-* simplicity
-* zero vendor lock-in
+````
 
+---
