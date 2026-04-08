@@ -44,8 +44,8 @@ ID_RE = re.compile(r"^[0-9]+$")
 SMTP_HOST = os.environ.get("OVPN_SMTP_HOST", "smtp.gmail.com")
 SMTP_PORT = int(os.environ.get("OVPN_SMTP_PORT", "465"))
 SMTP_USER = os.environ.get("OVPN_SMTP_USER", "")
-SMTP_PASS = os.environ.get("OVPN_SMTP_PASS", "")
 SMTP_FROM = os.environ.get("OVPN_SMTP_FROM", SMTP_USER)
+SMTP_PASS = os.environ.get("OVPN_SMTP_PASS", "")
 REGISTRY_FIELDS = ["id", "cn", "type", "email", "status", "created_at", "revoked_at"]
 PROTECTED_CNS = {"server", "ca"}
 
@@ -59,6 +59,447 @@ if ENV_FILE.exists():
             os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
         except ValueError:
             pass
+
+SUPPORT_EMAIL = os.environ.get("OVPN_SUPPORT_EMAIL", "vpn.admin.ovpn@gmail.com")
+def login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get("logged_in"):
+            return redirect(url_for("login"))
+        return f(*args, **kwargs)
+    return decorated
+
+def send_user_onboarding_email(
+    to_email: str,
+    username: str,
+    access_type: str,
+    portal_base_url: str,
+    temporary_password: str = ""
+):
+    if not SMTP_USER or not SMTP_PASS:
+        raise RuntimeError("SMTP is not configured.")
+
+    login_url = f"{portal_base_url}/user/login"
+    request_url = f"{portal_base_url}/user/request-access"
+
+    common_support = f"""
+Support:
+If you cannot access the portal or your VPN connection is unavailable, contact support at:
+{SUPPORT_EMAIL}
+"""
+
+    if access_type == "Certificate + Credentials":
+        subject = f"MSA User Access - {username}"
+        body = f"""Hello,
+
+Your Marano Secure Access (MSA) profile has been created.
+
+Username: {username}
+Access type: {access_type}
+User portal: {login_url}
+Temporary password: {temporary_password}
+
+How to access:
+1. Open the User Portal
+2. Sign in with your username and temporary password
+3. Change your password after login
+4. Download your OpenVPN profile from the portal
+
+{common_support}
+
+MSA
+"""
+
+    elif access_type == "Certificate":
+        subject = f"MSA Access Ready - {username}"
+        body = f"""Hello,
+
+Your Marano Secure Access (MSA) profile has been created.
+
+Username: {username}
+Access type: {access_type}
+User portal: {request_url}
+
+How to access:
+1. Open the User Portal
+2. Request a temporary access link
+3. Use the secure link sent to this email address
+4. Download your OpenVPN profile from the portal
+
+{common_support}
+
+MSA
+"""
+
+    elif access_type == "WireGuard":
+        subject = f"MSA Access Ready - {username}"
+        body = f"""Hello,
+
+Your Marano Secure Access (MSA) profile has been created.
+
+Username: {username}
+Access type: {access_type}
+User portal: {request_url}
+
+How to access:
+1. Open the User Portal
+2. Request a temporary access link
+3. Use the secure link sent to this email address
+4. Download your WireGuard configuration from the portal
+
+{common_support}
+
+MSA
+"""
+
+    else:
+        raise RuntimeError("Unsupported access type for onboarding email.")
+
+    msg = MIMEText(body, "plain")
+    msg["From"] = SMTP_FROM
+    msg["To"] = to_email
+    msg["Subject"] = subject
+
+    with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
+        server.login(SMTP_USER, SMTP_PASS)
+        server.send_message(msg)
+
+def send_user_access_link_email(to_email: str, username: str, access_link: str):
+    if not SMTP_USER or not SMTP_PASS:
+        raise RuntimeError("SMTP is not configured.")
+
+    subject = f"MSA Access Link - {username}"
+
+    body = f"""Hello,
+
+A secure access link was requested for your Marano Secure Access (MSA) user portal.
+
+Username: {username}
+
+Access link:
+{access_link}
+
+Security notes:
+- This link is temporary
+- It can be used only once
+- Do not share it with others
+
+If you did not request this link, ignore this message.
+
+MSA
+"""
+
+    msg = MIMEText(body, "plain")
+    msg["From"] = SMTP_FROM
+    msg["To"] = to_email
+    msg["Subject"] = subject
+
+    with smtplib.SMTP_SSL(SMTP_HOST, SMTP_PORT) as server:
+        server.login(SMTP_USER, SMTP_PASS)
+        server.send_message(msg)
+
+def ensure_user_portal_tokens_table():
+    conn = auth_db_conn()
+    cur = conn.cursor()
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS user_portal_tokens (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            username TEXT NOT NULL,
+            token TEXT NOT NULL UNIQUE,
+            expires_at TEXT NOT NULL,
+            is_used INTEGER NOT NULL DEFAULT 0,
+            created_at TEXT NOT NULL
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+def create_user_portal_token(username: str, minutes_valid: int = 60):
+    ensure_user_portal_tokens_table()
+
+    username = sanitize_name(username)
+    token = secrets.token_urlsafe(32)
+
+    now = datetime.now(timezone.utc)
+    expires_at = (now + timedelta(minutes=minutes_valid)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    created_at = now.strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    conn = auth_db_conn()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO user_portal_tokens (username, token, expires_at, is_used, created_at)
+        VALUES (?, ?, ?, 0, ?)
+    """, (username, token, expires_at, created_at))
+    conn.commit()
+    conn.close()
+
+    return token
+
+
+def get_valid_user_portal_token(token: str):
+    ensure_user_portal_tokens_table()
+
+    conn = auth_db_conn()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT username, token, expires_at, is_used
+        FROM user_portal_tokens
+        WHERE token = ?
+    """, (token,))
+    row = cur.fetchone()
+    conn.close()
+
+    if row is None:
+        return None
+
+    if int(row["is_used"]) != 0:
+        return None
+
+    try:
+        expires_at = datetime.strptime(row["expires_at"], "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
+    except Exception:
+        return None
+
+    if datetime.now(timezone.utc) > expires_at:
+        return None
+
+    return {
+        "username": row["username"],
+        "token": row["token"],
+        "expires_at": row["expires_at"],
+    }
+
+
+def mark_user_portal_token_used(token: str):
+    conn = auth_db_conn()
+    cur = conn.cursor()
+    cur.execute("""
+        UPDATE user_portal_tokens
+        SET is_used = 1
+        WHERE token = ?
+    """, (token,))
+    conn.commit()
+    changed = cur.rowcount
+    conn.close()
+    return changed > 0
+
+
+def can_use_self_service_access(user: dict) -> bool:
+    if not user:
+        return False
+    return user.get("access_type") in {"Certificate", "WireGuard"}
+
+def get_user_portal_instructions(access_type: str):
+    access_type = (access_type or "").strip()
+
+    if access_type == "Certificate + Credentials":
+        return {
+            "title": "OpenVPN Auth Profile",
+            "steps": [
+                "Download your OpenVPN profile.",
+                "Import the .ovpn file into your OpenVPN client.",
+                "Use your username and password when requested.",
+                "Keep your password private and change it immediately if it is temporary.",
+            ],
+        }
+
+    if access_type == "Certificate":
+        return {
+            "title": "OpenVPN Certificate Profile",
+            "steps": [
+                "Download your OpenVPN profile.",
+                "Import the .ovpn file into your OpenVPN client.",
+                "Connect using the embedded certificate-based profile.",
+                "Use one profile per device whenever possible.",
+            ],
+        }
+
+    if access_type == "WireGuard":
+        return {
+            "title": "WireGuard Profile",
+            "steps": [
+                "Download your WireGuard configuration file.",
+                "Import the .conf file into your WireGuard client.",
+                "Activate the tunnel after import.",
+                "Do not share this file with other users or devices.",
+            ],
+        }
+
+    return {
+        "title": "Profile Instructions",
+        "steps": [
+            "Download your profile.",
+            "Import it into the appropriate client.",
+            "Follow your organization guidance for secure use.",
+        ],
+    }
+
+def user_login_required(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not session.get("user_logged"):
+            return redirect(url_for("user_login"))
+        return f(*args, **kwargs)
+    return decorated
+
+
+def get_auth_user_portal_record(username: str):
+    conn = auth_db_conn()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT username, email, is_active, must_change_password
+        FROM users
+        WHERE username = ?
+    """, (username,))
+    row = cur.fetchone()
+    conn.close()
+
+    if row is None:
+        return None
+
+    return {
+        "username": row["username"],
+        "email": (row["email"] or "").strip() if "email" in row.keys() else "",
+        "is_active": int(row["is_active"]) == 1,
+        "must_change_password": int(row["must_change_password"]) == 1,
+    }
+
+def get_user_record(username: str):
+    username = sanitize_name(username)
+
+    auth_user = get_auth_user_portal_record(username)
+    if auth_user is not None:
+        return {
+            "username": username,
+            "email": auth_user["email"],
+            "access_type": "Certificate + Credentials",
+            "must_change_password": auth_user["must_change_password"],
+            "is_active": auth_user["is_active"],
+        }
+
+    row = get_latest_active_registry_row_by_cn(username)
+    if row:
+        access_type = (row.get("type") or "").strip()
+        if not access_type:
+            access_type = "Certificate"
+
+        return {
+            "username": username,
+            "email": (row.get("email") or "").strip(),
+            "access_type": access_type,
+            "must_change_password": False,
+            "is_active": True,
+        }
+
+    return None
+
+def verify_user_login(username: str, password: str):
+    username = sanitize_name(username)
+    return verify_auth_user_password(username, password)
+
+def user_profile_path(username: str, access_type: str = "") -> Path:
+    username = sanitize_name(username)
+    access_type = (access_type or "").strip()
+
+    auth_profile = Path(f"/etc/openvpn/client-configs-auth/files/{username}.ovpn")
+    standard_profile = ovpn_path(username)
+    wireguard_profile = Path(f"/etc/wireguard/clients/{username}.conf")
+
+    if access_type == "Certificate + Credentials":
+        if auth_profile.exists():
+            return auth_profile
+        if standard_profile.exists():
+            return standard_profile
+        return auth_profile
+
+    if access_type == "Certificate":
+        if standard_profile.exists():
+            return standard_profile
+        if auth_profile.exists():
+            return auth_profile
+        return standard_profile
+
+    if access_type == "WireGuard":
+        return wireguard_profile
+
+    if auth_profile.exists():
+        return auth_profile
+    if standard_profile.exists():
+        return standard_profile
+    if wireguard_profile.exists():
+        return wireguard_profile
+
+    return standard_profile
+
+def normalize_email(email: str) -> str:
+    return (email or "").strip().lower()
+
+def friendly_error_message(exc: Exception) -> str:
+    msg = str(exc)
+
+    if "UNIQUE constraint failed: users.email" in msg:
+        return "This email is already associated with another active identity."
+
+    if "UNIQUE constraint failed" in msg:
+        return "A unique constraint blocked this operation."
+
+    return msg
+
+def get_auth_user_by_email(email: str):
+    email = normalize_email(email)
+    if not email:
+        return None
+
+    conn = auth_db_conn()
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT username, email, is_active
+        FROM users
+        WHERE lower(email) = ?
+    """, (email,))
+    row = cur.fetchone()
+    conn.close()
+    return row
+
+def registry_email_already_in_use(email: str, ignore_username: str = "") -> bool:
+    email = normalize_email(email)
+    ignore_username = sanitize_name(ignore_username) if ignore_username else ""
+
+    if not email:
+        return False
+
+    for row in read_registry_rows():
+        row_email = normalize_email(row.get("email", ""))
+        row_cn = (row.get("cn") or "").strip()
+        row_status = (row.get("status") or "").strip().lower()
+
+        if not row_email:
+            continue
+
+        if row_status != "active":
+            continue
+
+        if row_email == email and row_cn != ignore_username:
+            return True
+
+    return False
+
+def validate_unique_email_for_profile(email: str, username: str = ""):
+    email = normalize_email(email)
+    username = sanitize_name(username) if username else ""
+
+    if not email:
+        raise RuntimeError("Email is required.")
+
+    auth_row = get_auth_user_by_email(email)
+    if auth_row is not None:
+        auth_username = (auth_row["username"] or "").strip()
+        if auth_username != username:
+            raise RuntimeError("This email is already associated with another active identity.")
+
+    if registry_email_already_in_use(email, ignore_username=username):
+        raise RuntimeError("This email is already associated with another active identity.")
+
 def rebuild_registry():
     from datetime import datetime
 
@@ -295,20 +736,23 @@ def next_registry_id(rows=None):
 
     return str(max(ids, default=0) + 1)
 
-
 def add_registry_entry(cn: str, access_type: str, email: str = ""):
     cn = sanitize_name(cn)
+    email = normalize_email(email)
     rows = read_registry_rows()
 
     for row in rows:
         if row["cn"] == cn and row["status"] == "active":
+            if email and normalize_email(row.get("email", "")) != email:
+                row["email"] = email
+                write_registry_rows(rows)
             return row
 
     new_row = {
         "id": next_registry_id(rows),
         "cn": cn,
         "type": access_type,
-        "email": (email or "").strip(),
+        "email": email,
         "status": "active",
         "created_at": datetime.now().isoformat(timespec="seconds"),
         "revoked_at": "",
@@ -317,7 +761,6 @@ def add_registry_entry(cn: str, access_type: str, email: str = ""):
     rows.append(new_row)
     write_registry_rows(rows)
     return new_row
-
 
 def mark_registry_revoked_by_cn(cn: str):
     cn = sanitize_name(cn)
@@ -375,14 +818,6 @@ def get_latest_active_registry_row_by_cn(cn: str):
 
 def count_registry_status(status: str):
     return sum(1 for row in read_registry_rows() if row["status"] == status)
-
-def login_required(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        if not session.get("logged_in"):
-            return redirect(url_for("login"))
-        return f(*args, **kwargs)
-    return decorated
 
 @app.before_request
 def refresh_session_timeout():
@@ -549,10 +984,9 @@ def create_auth_profiles_from_csv(file_storage, auto_send_email: bool = True):
 
         try:
             username = sanitize_name(username)
-
             if not client_exists(username):
+                validate_unique_email_for_profile(email, username=username)
                 create_client_only(username)
-
             temporary_password = create_auth_user(username, email=email)
             out = generate_auth_ovpn_only(username)
 
@@ -588,15 +1022,15 @@ def create_auth_profiles_batch(prefix: str, start: int, end: int, email_domain: 
 
     for i in range(start, end + 1):
         name = f"{prefix}{i}"
-        email = f"{name}@{email_domain}" if email_domain else ""
-
+        email = normalize_email(f"{name}@{email_domain}") if email_domain else ""
         try:
             if not client_exists(name):
+                validate_unique_email_for_profile(email, username=name)
                 create_client_only(name)
 
             temporary_password = create_auth_user(name, email=email)
             out = generate_auth_ovpn_only(name)
-            add_registry_entry(name, "Certificate", email="")
+            add_registry_entry(name, "Certificate + Credentials", email=email)
             results.append({
                 "username": name,
                 "email": email,
@@ -643,6 +1077,203 @@ def send_auth_profiles_batch_email(results: list[dict]):
 
     return sent, failed
 
+@app.route("/user/token-login")
+def user_token_login():
+    token = (request.args.get("token") or "").strip()
+
+    if not token:
+        flash("Invalid access link", "err")
+        return redirect(url_for("user_request_access"))
+
+    token_data = get_valid_user_portal_token(token)
+    if token_data is None:
+        flash("This access link is invalid or expired", "err")
+        return redirect(url_for("user_request_access"))
+
+    username = sanitize_name(token_data["username"])
+    user = get_user_record(username)
+
+    if not user or not user.get("is_active"):
+        flash("User inactive or not found", "err")
+        return redirect(url_for("user_request_access"))
+
+    if not can_use_self_service_access(user):
+        flash("This user must use the normal login flow", "warn")
+        return redirect(url_for("user_login"))
+
+    session["user_logged"] = True
+    session["user_username"] = username
+
+    mark_user_portal_token_used(token)
+
+    return redirect(url_for("user_dashboard"))
+
+@app.route("/user/request-access", methods=["GET", "POST"])
+def user_request_access():
+    if request.method == "POST":
+        username = sanitize_name(request.form.get("username", ""))
+        delivery_method = (request.form.get("delivery_method") or "email").strip().lower()
+
+        user = get_user_record(username)
+
+        # resposta neutra para não facilitar enumeração
+        generic_msg = "If the account is eligible, an access link has been sent."
+
+        if not user or not user.get("is_active") or not can_use_self_service_access(user):
+            flash(generic_msg, "ok")
+            return render_template("user_request_access.html")
+
+        if delivery_method != "email":
+            flash("Only email delivery is enabled in this phase.", "warn")
+            return render_template("user_request_access.html")
+
+        email = (user.get("email") or "").strip()
+        if not email:
+            flash(generic_msg, "ok")
+            return render_template("user_request_access.html")
+
+        try:
+            token = create_user_portal_token(username, minutes_valid=60)
+            base_url = request.host_url.rstrip("/")
+            access_link = f"{base_url}{url_for('user_token_login')}?token={token}"
+
+            send_user_access_link_email(email, username, access_link)
+
+            flash(generic_msg, "ok")
+            return render_template("user_request_access.html")
+
+        except Exception as e:
+            flash(str(e), "err")
+            return render_template("user_request_access.html")
+
+    return render_template("user_request_access.html")
+
+@app.route("/user/login", methods=["GET", "POST"])
+def user_login():
+    if request.method == "POST":
+        username = sanitize_name(request.form.get("username", ""))
+        password = request.form.get("password", "")
+
+        if not verify_user_login(username, password):
+            flash("Invalid credentials", "err")
+            return render_template("user_login.html")
+
+        user = get_user_record(username)
+
+        if not user or not user["is_active"]:
+            flash("User inactive or not found", "err")
+            return render_template("user_login.html")
+
+        session["user_logged"] = True
+        session["user_username"] = username
+
+        if user.get("must_change_password"):
+            return redirect(url_for("user_change_password"))
+
+        return redirect(url_for("user_dashboard"))
+
+    return render_template("user_login.html")
+
+
+@app.route("/user/logout")
+def user_logout():
+    session.pop("user_logged", None)
+    session.pop("user_username", None)
+    return redirect(url_for("user_login"))
+
+@app.route("/user/dashboard")
+@user_login_required
+def user_dashboard():
+    username = session.get("user_username")
+    user = get_user_record(username)
+
+    if not user:
+        flash("User not found", "err")
+        return redirect(url_for("user_logout"))
+
+    profile_path = user_profile_path(username, user["access_type"])
+    profile_exists = profile_path.exists()
+
+    if user["access_type"] == "WireGuard":
+        profile_label = "Download WireGuard Config"
+    else:
+        profile_label = "Download OpenVPN Profile"
+
+    can_change_password = user["access_type"] == "Certificate + Credentials"
+    instructions = get_user_portal_instructions(user["access_type"])
+
+    return render_template(
+        "user_dashboard.html",
+        user=user,
+        profile_exists=profile_exists,
+        profile_label=profile_label,
+        profile_name=profile_path.name if profile_exists else "",
+        can_change_password=can_change_password,
+        instructions=instructions,
+    )
+
+@app.route("/user/change-password", methods=["GET", "POST"])
+@user_login_required
+def user_change_password():
+    username = session.get("user_username")
+    user = get_user_record(username)
+
+    if not user:
+        flash("User not found", "err")
+        return redirect(url_for("user_logout"))
+
+    if user["access_type"] != "Certificate + Credentials":
+        flash("Password change not allowed for this user", "warn")
+        return redirect(url_for("user_dashboard"))
+
+    if request.method == "POST":
+        current_password = request.form.get("current_password", "")
+        new_password = request.form.get("new_password", "")
+        confirm_password = request.form.get("confirm_password", "")
+
+        if not verify_auth_user_password(username, current_password):
+            flash("Current password is invalid", "err")
+            return render_template("user_change_password.html", user=user)
+
+        if len(new_password) < 8:
+            flash("New password must have at least 8 characters", "err")
+            return render_template("user_change_password.html", user=user)
+
+        if new_password != confirm_password:
+            flash("Password confirmation does not match", "err")
+            return render_template("user_change_password.html", user=user)
+
+        try:
+            changed = set_user_password(username, new_password, must_change_password=0)
+            if not changed:
+                raise RuntimeError("Password update failed")
+
+            flash("Password changed successfully", "ok")
+            return redirect(url_for("user_dashboard"))
+
+        except Exception as e:
+            flash(str(e), "err")
+
+    return render_template("user_change_password.html", user=user)
+
+@app.route("/user/download")
+@user_login_required
+def user_download():
+    username = session.get("user_username")
+    user = get_user_record(username)
+
+    if not user:
+        flash("User not found", "err")
+        return redirect(url_for("user_logout"))
+
+    path = user_profile_path(username, user["access_type"])
+
+    if not path.exists():
+        flash("Profile not found", "err")
+        return redirect(url_for("user_dashboard"))
+
+    return send_file(path, as_attachment=True, download_name=path.name)
+
 @app.route("/rebuild-registry", methods=["POST"])
 @login_required
 def rebuild_registry_route():
@@ -687,7 +1318,10 @@ def create_auth_profile_page():
 
     try:
         name = sanitize_name(request.form.get("name", ""))
-        email = (request.form.get("email", "") or "").strip()
+        email = normalize_email(request.form.get("email", ""))
+        if not email:
+            raise RuntimeError("Email is required.")
+        validate_unique_email_for_profile(email, username=name)
 
         if not client_exists(name):
             create_client_only(name)
@@ -695,6 +1329,17 @@ def create_auth_profile_page():
         temporary_password = create_auth_user(name, email=email)
         out = generate_auth_ovpn_only(name)
         add_registry_entry(name, "Certificate + Credentials", email=email)
+
+        portal_base_url = request.host_url.rstrip("/")
+        send_user_onboarding_email(
+            email,
+            name,
+            "Certificate + Credentials",
+            portal_base_url,
+            temporary_password=temporary_password
+        )
+
+        flash(f"Onboarding instructions sent to {email}.", "ok")
 
         return render_page(
             "create_auth_profile.html",
@@ -704,11 +1349,14 @@ def create_auth_profile_page():
                 "temporary_password": temporary_password,
                 "profile_path": str(out),
                 "email": email,
+                "portal_url": f"{portal_base_url}/user/login",
+                "portal_mode": "login",
+                "support_email": SUPPORT_EMAIL,
             }
         )
 
     except Exception as e:
-        flash(str(e), "err")
+        flash(friendly_error_message(e), "err")
         return redirect(url_for("create_auth_profile_page"))
 
 @app.route("/login", methods=["GET", "POST"])
@@ -752,6 +1400,7 @@ def logout():
     return redirect(url_for("login"))
 
 @app.route("/reset-password-resend-telegram", methods=["POST"])
+@login_required
 def reset_password_resend_telegram_route():
     try:
         name = sanitize_name(request.form.get("name", ""))
@@ -779,6 +1428,7 @@ def reset_password_resend_telegram_route():
     return redirect(url_for("index"))
 
 @app.route("/reset-password-resend-email", methods=["POST"])
+@login_required
 def reset_password_resend_email_route():
     try:
         name = sanitize_name(request.form.get("name", ""))
@@ -806,6 +1456,7 @@ def reset_password_resend_email_route():
     return redirect(url_for("index"))
 
 @app.route("/send-email", methods=["POST"])
+@login_required
 def send_email_route():
     try:
         name = sanitize_name(request.form.get("name", ""))
@@ -844,6 +1495,7 @@ def send_email_route():
     return redirect(url_for("index"))
 
 @app.route("/restart-openvpn", methods=["POST"])
+@login_required
 def restart_openvpn_route():
     try:
         msg = restart_openvpn_service()
@@ -854,6 +1506,7 @@ def restart_openvpn_route():
 
 
 @app.route("/restart-nginx", methods=["POST"])
+@login_required
 def restart_nginx_route():
     try:
         msg = restart_nginx_service()
@@ -864,6 +1517,7 @@ def restart_nginx_route():
 
 
 @app.route("/restart-vpn-and-nginx", methods=["POST"])
+@login_required
 def restart_vpn_and_nginx_route():
     try:
         msg = restart_vpn_and_nginx()
@@ -873,6 +1527,7 @@ def restart_vpn_and_nginx_route():
     return redirect(request.referrer or url_for("index"))
 
 @app.route("/registry-export")
+@login_required
 def registry_export_page():
     rows = list(reversed(read_registry_rows()))
     return render_page(
@@ -882,10 +1537,12 @@ def registry_export_page():
     )
 
 @app.route("/revoke-access")
+@login_required
 def revoke_access_page():
     return render_page("revoke_access.html", active_page="revoke_access")
 
 @app.route("/create-vpn-profile", methods=["GET", "POST"])
+@login_required
 def create_vpn_profile_page():
     if request.method == "GET":
         return render_page(
@@ -897,65 +1554,113 @@ def create_vpn_profile_page():
     try:
         vpn_type = (request.form.get("vpn_type", "") or "").strip()
         name = sanitize_name(request.form.get("name", ""))
-        email = (request.form.get("email", "") or "").strip()
+        email = normalize_email(request.form.get("email", ""))
+        if not email:
+            raise RuntimeError("Email is required for all VPN profiles.")
         send_email_flag = request.form.get("send_email") == "on"
         send_telegram_flag = request.form.get("send_telegram") == "on"
+
+        if not email:
+            raise RuntimeError("Email is required.")
+
+        validate_unique_email_for_profile(email, username=name)
+
+        portal_base_url = request.host_url.rstrip("/")
 
         created = {
             "vpn_type": vpn_type,
             "username": name,
             "profile_path": "",
             "temporary_password": "",
+            "email": email,
+            "portal_url": "",
+            "portal_mode": "",
+            "support_email": SUPPORT_EMAIL,
         }
 
         if vpn_type == "openvpn_cert":
             if not client_exists(name):
                 create_client_only(name)
+
             out = generate_ovpn_only(name)
             created["profile_path"] = str(out)
-            add_registry_entry(name,"Certificate", email=email)
+
+            add_registry_entry(name, "Certificate", email=email)
+
             if send_email_flag:
-                if not email:
-                    raise RuntimeError("Email is required when 'Send via email' is enabled.")
                 send_profile_email(email, name, "", out)
+
+            send_user_onboarding_email(
+                email,
+                name,
+                "Certificate",
+                portal_base_url
+            )
 
             if send_telegram_flag:
                 msg = export_telegram(name)
                 flash(msg, "ok")
 
+            created["portal_url"] = f"{portal_base_url}/user/request-access"
+            created["portal_mode"] = "request_access"
+
         elif vpn_type == "openvpn_auth":
             if not client_exists(name):
                 create_client_only(name)
+
             temporary_password = create_auth_user(name, email=email)
             out = generate_auth_ovpn_only(name)
 
             created["profile_path"] = str(out)
             created["temporary_password"] = temporary_password
-            add_registry_entry(name,"Certificate + Credentials", email=email)
+
+            add_registry_entry(name, "Certificate + Credentials", email=email)
 
             if send_email_flag:
-                if not email:
-                    raise RuntimeError("Email is required when 'Send via email' is enabled.")
                 send_profile_email(email, name, temporary_password, out)
+
+            send_user_onboarding_email(
+                email,
+                name,
+                "Certificate + Credentials",
+                portal_base_url,
+                temporary_password=temporary_password
+            )
 
             if send_telegram_flag:
                 msg = export_telegram_auth(name)
                 flash(msg, "ok")
 
+            created["portal_url"] = f"{portal_base_url}/user/login"
+            created["portal_mode"] = "login"
+
         elif vpn_type == "wireguard":
             wg_created = create_wireguard_profile(name)
             created["profile_path"] = wg_created["profile_path"]
+
             add_registry_entry(name, "WireGuard", email=email)
+
             if send_email_flag:
-                if not email:
-                    raise RuntimeError("Email is required when 'Send via email' is enabled.")
                 send_wireguard_email(email, name, Path(wg_created["profile_path"]))
+
+            send_user_onboarding_email(
+                email,
+                name,
+                "WireGuard",
+                portal_base_url
+            )
+
+            created["portal_url"] = f"{portal_base_url}/user/request-access"
+            created["portal_mode"] = "request_access"
 
         else:
             raise RuntimeError("Invalid VPN type.")
 
-        if send_email_flag and email:
-            flash(f"Profile sent by email to {email}.", "ok")
+        flash(f"Profile created successfully for {name}.", "ok")
+        flash(f"Onboarding instructions sent to {email}.", "ok")
+
+        if send_email_flag:
+            flash(f"Profile file sent by email to {email}.", "ok")
 
         return render_page(
             "create_vpn_profile.html",
@@ -964,7 +1669,7 @@ def create_vpn_profile_page():
         )
 
     except Exception as e:
-        flash(str(e) or "Unexpected error while creating VPN profile.", "err")
+        flash(friendly_error_message(e) or "Unexpected error while creating VPN profile.", "err")
         return redirect(url_for("create_vpn_profile_page"))
 
 @app.route("/download-wireguard/<name>")
@@ -1000,6 +1705,7 @@ def wireguard_qr(name):
         return redirect(url_for("create_wireguard_profile_page"))
 
 @app.route("/create-wireguard-profile", methods=["GET", "POST"])
+@login_required
 def create_wireguard_profile_page():
     if request.method == "GET":
         return render_page(
@@ -1009,30 +1715,54 @@ def create_wireguard_profile_page():
         )
 
     try:
-        name = (request.form.get("name", "") or "").strip()
+        name = sanitize_name((request.form.get("name", "") or "").strip())
+        email = normalize_email(request.form.get("email", ""))
+        if not email:
+            raise RuntimeError("Email is required for all VPN profiles.")
         auto_send_email = request.form.get("auto_send_email") == "on"
 
         if not name:
             raise RuntimeError("Name is required.")
 
+        if not email:
+            raise RuntimeError("Email is required.")
+
+        validate_unique_email_for_profile(email, username=name)
+
         created = create_wireguard_profile(name)
+        add_registry_entry(name, "WireGuard", email=email)
 
         if auto_send_email:
-            email = request.form.get("email", "").strip()
-            if email:
-                send_wireguard_email(email, name, Path(created["profile_path"]))
+            send_wireguard_email(email, name, Path(created["profile_path"]))
+
+        portal_base_url = request.host_url.rstrip("/")
+        send_user_onboarding_email(
+            email,
+            name,
+            "WireGuard",
+            portal_base_url
+        )
+
+        flash(f"Onboarding instructions sent to {email}.", "ok")
 
         return render_page(
             "create_wireguard_profile.html",
             active_page="wireguard",
-            created=created,
+            created={
+                **created,
+                "email": email,
+                "portal_url": f"{portal_base_url}/user/request-access",
+                "portal_mode": "request_access",
+                "support_email": SUPPORT_EMAIL,
+            },
         )
 
     except Exception as e:
-        flash(str(e), "err")
+        flash(friendly_error_message(e), "err")
         return redirect(url_for("create_wireguard_profile_page"))
 
 @app.route("/batch-auth-profiles-csv", methods=["GET", "POST"])
+@login_required
 def batch_auth_profiles_csv_page():
     if request.method == "GET":
         return render_page(
@@ -1054,10 +1784,11 @@ def batch_auth_profiles_csv_page():
         )
 
     except Exception as e:
-        flash(str(e), "err")
+        flash(friendly_error_message(e), "err")
         return redirect(url_for("batch_auth_profiles_csv_page"))
 
 @app.route("/batch-auth-profiles", methods=["GET", "POST"])
+@login_required
 def batch_auth_profiles_page():
     if request.method == "GET":
         return render_page(
@@ -1095,7 +1826,7 @@ def batch_auth_profiles_page():
         )
 
     except Exception as e:
-        flash(str(e), "err")
+        flash(friendly_error_message(e), "err")
         return redirect(url_for("batch_auth_profiles_page"))
 
 def send_profile_email(to_email: str, username: str, temporary_password: str, ovpn_file: Path):
@@ -1195,9 +1926,16 @@ def create_auth_profile(username):
         "ovpn_path": ovpn_path
     }
 
+
 def create_auth_user(username: str, email: str = "", temporary_password: str | None = None):
     username = sanitize_name(username)
+    email = normalize_email(email)
     temporary_password = temporary_password or generate_temporary_password()
+
+    if not email:
+        raise RuntimeError("Email is required.")
+
+    validate_unique_email_for_profile(email, username=username)
 
     if get_auth_user(username) is not None:
         raise RuntimeError(f"Auth user '{username}' already exists.")
@@ -1206,20 +1944,27 @@ def create_auth_user(username: str, email: str = "", temporary_password: str | N
     cur = conn.cursor()
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    cur.execute("""
-        INSERT INTO users (username, password_hash, email, must_change_password, is_active, created_at, updated_at)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
-    """, (
-        username,
-        generate_password_hash(temporary_password),
-        email,
-        1,
-        1,
-        now,
-        now
-    ))
-    conn.commit()
-    conn.close()
+    try:
+        cur.execute("""
+            INSERT INTO users (username, password_hash, email, must_change_password, is_active, created_at, updated_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?)
+        """, (
+            username,
+            generate_password_hash(temporary_password),
+            email,
+            1,
+            1,
+            now,
+            now
+        ))
+        conn.commit()
+
+    except sqlite3.IntegrityError as e:
+        conn.rollback()
+        raise RuntimeError("This email is already associated with another active identity.") from e
+
+    finally:
+        conn.close()
 
     return temporary_password
 
@@ -1763,7 +2508,7 @@ def create_client_route():
     try:
         name = sanitize_name(request.form.get("name", ""))
         msg = create_client_only(name)
-        add_registry_entry(name, "Certificate", email="")
+        add_registry_entry(name, "Certificate + Credentials", email=email)
         flash(msg, "ok")
     except Exception as e:
         flash(str(e), "err")
@@ -1855,6 +2600,7 @@ def connected_page():
 
 
 @app.route("/send-telegram", methods=["POST"])
+@login_required
 def send_telegram_route():
     try:
         name = sanitize_name(request.form.get("name", ""))
@@ -1865,6 +2611,7 @@ def send_telegram_route():
     return redirect(url_for("index"))
 
 @app.route("/send-auth-telegram", methods=["POST"])
+@login_required
 def send_auth_telegram_route():
     try:
         name = sanitize_name(request.form.get("name", ""))
@@ -1875,6 +2622,7 @@ def send_auth_telegram_route():
     return redirect(url_for("create_auth_profile_page"))
 
 @app.route("/send-auth-email", methods=["POST"])
+@login_required
 def send_auth_email_route():
     try:
         name = sanitize_name(request.form.get("name", ""))
@@ -1894,6 +2642,7 @@ def send_auth_email_route():
     return redirect(url_for("create_auth_profile_page"))
 
 @app.route("/download-form")
+@login_required
 def download_ovpn_by_form():
     try:
         name = sanitize_name(request.args.get("name", ""))
@@ -1904,6 +2653,7 @@ def download_ovpn_by_form():
 
 
 @app.route("/download/<name>")
+@login_required
 def download_ovpn(name):
     try:
         name = sanitize_name(name)
@@ -1917,6 +2667,7 @@ def download_ovpn(name):
 
 
 @app.route("/logs")
+@login_required
 def logs_page():
     res = run_cmd(["journalctl", "-u", SERVER_UNIT, "-n", "150", "--no-pager"], check=False)
     data = res.stdout or res.stderr or "No output."
@@ -1924,12 +2675,14 @@ def logs_page():
 
 
 @app.route("/health")
+@login_required
 def health_page():
     data = server_health()
     return render_page("health.html", active_page="health", data=data)
 
 
 @app.route("/batch-create", methods=["POST"])
+@login_required
 def batch_create_route():
     try:
         start = int(request.form.get("start", "0"))
@@ -1957,29 +2710,31 @@ def batch_create_route():
 
 
 @app.route("/registry")
+@login_required
 def registry_page():
     rows = list(reversed(read_registry_rows()))
     return render_page("registry.html", active_page="registry", rows=rows)
 
 
 @app.route("/registry/download")
+@login_required
 def download_registry():
     return send_file(REGISTRY, as_attachment=True, download_name="registry.csv")
 
 
 @app.route("/revoke-id", methods=["POST"])
+@login_required
 def revoke_id_route():
     try:
         id_value = sanitize_id(request.form.get("id", ""))
         cn, hint = revoke_by_id(id_value)
         flash(f"ID {id_value} / CN {cn} revoked. {hint}", "warn")
-        mark_registry_revoked_by_id(reg_id)
     except Exception as e:
         flash(str(e), "err")
     return redirect(url_for("index"))
 
-
 @app.route("/revoke-range", methods=["POST"])
+@login_required
 def revoke_range_route():
     try:
         start = int(request.form.get("start", "0"))

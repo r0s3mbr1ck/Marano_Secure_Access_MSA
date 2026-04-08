@@ -4,7 +4,8 @@
 <div class="card" style="max-width:820px; margin:0 auto;">
   <h2>Create Certificate + Password Profile</h2>
   <div class="muted">
-    This mode requires both a valid client certificate and a username/password. The first password must be changed in the portal before VPN access is allowed.
+    This mode requires both a valid client certificate and a username/password.
+    The first password must be changed in the User Portal before VPN access is allowed.
   </div>
 
   <div class="hr"></div>
@@ -13,8 +14,13 @@
     <label>Client name / username</label>
     <input name="name" placeholder="alex-note" required>
 
-    <label>Email (optional)</label>
-    <input name="email" type="email" placeholder="user@example.com">
+    <label>Email</label>
+    <input name="email" type="email" placeholder="user@example.com" required>
+
+    <div class="flash warn" style="margin-top:14px;">
+      Onboarding instructions are always sent by email.
+      The user will receive the correct portal URL and first access guidance automatically.
+    </div>
 
     <div class="form-actions">
       <button type="submit" class="btn-primary">Create Auth Profile</button>
@@ -26,12 +32,25 @@
 
     <div class="flash ok">
 Username: {{ created.username }}
+Email: {{ created.email }}
 Temporary password: {{ created.temporary_password }}
 Profile: {{ created.profile_path }}
 
 Important:
 - This password is temporary
-- The user must access the Change Password page before using the VPN auth profile
+- The user must change the password in the User Portal before using the VPN auth profile
+    </div>
+
+    <div class="card" style="margin-top:18px;">
+      <h2>Access Instructions</h2>
+
+      <p><strong>User:</strong> {{ created.username }}</p>
+      <p><strong>Email:</strong> {{ created.email }}</p>
+      <p><strong>Profile:</strong> {{ created.profile_path }}</p>
+      <p><strong>Temporary password:</strong> {{ created.temporary_password }}</p>
+      <p><strong>User portal:</strong> {{ created.portal_url }}</p>
+      <p><strong>Portal flow:</strong> User must access the portal using username and password.</p>
+      <p><strong>Support:</strong> {{ created.support_email }}</p>
     </div>
 
     <div class="actions" style="justify-content:center; margin-top:14px;">

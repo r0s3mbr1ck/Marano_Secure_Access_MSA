@@ -5,7 +5,7 @@
   <h2>Create WireGuard Profile</h2>
 
   <div class="muted">
-    This will generate a WireGuard client configuration.
+    Create a WireGuard client configuration and send mandatory onboarding instructions by email.
   </div>
 
   <div class="hr"></div>
@@ -14,12 +14,17 @@
     <label>Client name</label>
     <input name="name" placeholder="alex-wg1" required>
 
-    <label>Email (optional)</label>
-    <input name="email" type="email">
+    <label>Email</label>
+    <input name="email" type="email" placeholder="user@example.com" required>
+
+    <div class="flash warn" style="margin-top:14px;">
+      Onboarding instructions are always sent by email.
+      The option below only controls whether the WireGuard profile file is attached and sent by email.
+    </div>
 
     <label style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:14px;">
       <input type="checkbox" name="auto_send_email" style="width:auto;">
-      <span>Send via email</span>
+      <span>Attach and send WireGuard profile by email</span>
     </label>
 
     <div class="form-actions">
@@ -31,8 +36,21 @@
     <div class="hr"></div>
 
     <div class="flash ok">
-WireGuard profile created:
-{{ created.profile_path }}
+WireGuard profile created
+Username: {{ created.username }}
+Email: {{ created.email }}
+Profile: {{ created.profile_path }}
+    </div>
+
+    <div class="card" style="margin-top:18px;">
+      <h2>Access Instructions</h2>
+
+      <p><strong>User:</strong> {{ created.username }}</p>
+      <p><strong>Email:</strong> {{ created.email }}</p>
+      <p><strong>Profile:</strong> {{ created.profile_path }}</p>
+      <p><strong>User portal:</strong> {{ created.portal_url }}</p>
+      <p><strong>Portal flow:</strong> User must request a temporary access link in the portal.</p>
+      <p><strong>Support:</strong> {{ created.support_email }}</p>
     </div>
 
     <div class="actions" style="justify-content:center; margin-top:14px;">

@@ -20,16 +20,21 @@
     <label>Client name / username</label>
     <input name="name" placeholder="alex-note" required>
 
-    <label>Email (optional)</label>
-    <input name="email" type="email" placeholder="user@example.com">
+    <label>Email</label>
+    <input name="email" type="email" placeholder="user@example.com" required>
 
     <div id="auth_hint" style="display:none; margin-top:14px;" class="flash warn">
-      This mode creates a temporary password. The user must change it before VPN access is allowed.
+      This mode creates a temporary password. The user must change it after first login in the User Portal.
+    </div>
+
+    <div class="flash warn" style="margin-top:14px;">
+      Onboarding instructions are always sent by email.
+      The option below only controls whether the VPN profile file is attached and sent by email.
     </div>
 
     <label style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:14px;">
       <input type="checkbox" name="send_email" style="width:auto;">
-      <span>Send via email</span>
+      <span>Attach and send profile file by email</span>
     </label>
 
     <label style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:14px;">
@@ -48,10 +53,36 @@
     <div class="flash ok">
 VPN type: {{ created.vpn_type }}
 Username: {{ created.username }}
+Email: {{ created.email }}
 Profile: {{ created.profile_path }}
 {% if created.temporary_password %}
 Temporary password: {{ created.temporary_password }}
 {% endif %}
+    </div>
+
+    <div class="card" style="margin-top:18px;">
+      <h2>Access Instructions</h2>
+
+      <p><strong>User:</strong> {{ created.username }}</p>
+      <p><strong>Email:</strong> {{ created.email }}</p>
+
+      {% if created.profile_path %}
+      <p><strong>Profile:</strong> {{ created.profile_path }}</p>
+      {% endif %}
+
+      {% if created.temporary_password %}
+      <p><strong>Temporary password:</strong> {{ created.temporary_password }}</p>
+      {% endif %}
+
+      <p><strong>User portal:</strong> {{ created.portal_url }}</p>
+
+      {% if created.portal_mode == "login" %}
+      <p><strong>Portal flow:</strong> User must access the portal using username and password.</p>
+      {% else %}
+      <p><strong>Portal flow:</strong> User must request a temporary access link in the portal.</p>
+      {% endif %}
+
+      <p><strong>Support:</strong> {{ created.support_email }}</p>
     </div>
 
     <div class="actions" style="justify-content:center; margin-top:14px;">

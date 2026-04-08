@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>User Access Link - MSA</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/msa-favicon.svg') }}">
+  <style>
+    :root {
+      --bg-1: #0f1f5c;
+      --bg-2: #142b79;
+      --panel: rgba(22, 40, 104, 0.92);
+      --panel-border: rgba(255,255,255,0.08);
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --input-bg: rgba(255,255,255,0.94);
+      --input-text: #0f172a;
+      --button: #52b6ff;
+      --button-hover: #67c0ff;
+      --shadow: 0 24px 60px rgba(0,0,0,0.38);
+      --radius: 24px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Arial, sans-serif;
+      background:
+        radial-gradient(circle at top right, rgba(96,165,250,0.18), transparent 28%),
+        radial-gradient(circle at bottom left, rgba(59,130,246,0.14), transparent 25%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 32px;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: 760px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--panel-border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 40px;
+      backdrop-filter: blur(8px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 12px;
+    }
+
+    .brand img {
+      width: 60px;
+      height: 60px;
+    }
+
+    .title {
+      text-align: center;
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: var(--muted);
+      margin-bottom: 26px;
+      line-height: 1.6;
+    }
+
+    .flash {
+      background: rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .input-wrap {
+      margin-bottom: 16px;
+    }
+
+    .input-wrap input,
+    .input-wrap select {
+      width: 100%;
+      height: 64px;
+      border: none;
+      outline: none;
+      border-radius: 14px;
+      padding: 0 18px;
+      background: var(--input-bg);
+      color: var(--input-text);
+      font-size: 18px;
+    }
+
+    .submit-row {
+      margin-top: 10px;
+      width: 100%;
+    }
+
+    .submit-row button {
+      width: 100%;
+      height: 64px;
+      border: none;
+      outline: none;
+      border-radius: 14px;
+      background: var(--button);
+      color: white;
+      font-size: 22px;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .submit-row button:hover {
+      background: var(--button-hover);
+    }
+
+    .links {
+      margin-top: 16px;
+      text-align: center;
+    }
+
+    .links a {
+      color: #dbeafe;
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    @media (max-width: 640px) {
+      .card { padding: 24px 20px; }
+      .title { font-size: 24px; }
+      .input-wrap input,
+      .input-wrap select,
+      .submit-row button {
+        height: 58px;
+        font-size: 17px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="card">
+      <div class="brand">
+        <img src="{{ url_for('static', filename='img/msa-favicon.svg') }}" alt="MSA Logo">
+      </div>
+
+      <div class="title">Request Access Link</div>
+      <div class="subtitle">
+        Available for <strong>Certificate</strong> and <strong>WireGuard</strong> users.<br>
+        If eligible, a secure temporary access link will be sent.
+      </div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash">{{ messages[0][1] }}</div>
+        {% endif %}
+      {% endwith %}
+
+      <form method="post">
+        <div class="input-wrap">
+          <input type="text" name="username" placeholder="Username" required>
+        </div>
+
+        <div class="input-wrap">
+          <select name="delivery_method">
+            <option value="email">Send by Email</option>
+          </select>
+        </div>
+
+        <div class="submit-row">
+          <button type="submit">Send Access Link</button>
+        </div>
+      </form>
+
+      <div class="links">
+        <a href="{{ url_for('user_login') }}">Back to user login</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
