@@ -256,13 +256,16 @@ Features:
 
 ## 📁 Project Structure
 ```text
-project/
+Marano_Secure_Access_MSA/
 ├── app.py
 ├── requirements.txt
 ├── templates/
+│   └── index.html
 ├── static/
+│   └── css/
+│       └── style.css
 ├── docs/
-├── images/
+│   └── images/
 └── examples/
 ```
 
