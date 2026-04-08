@@ -1,6 +1,24 @@
-.env
-.ovpn
-pki/
-*.key
-*.crt
+# Registry / data
+registry/
 data/
+db/
+*.json
+
+# Certs / PKI
+pki/
+*.crt
+*.key
+*.csr
+*.pem
+
+# VPN Profiles
+*.ovpn
+clients/
+profiles/
+
+# Env
+.env
+
+# SQLite
+*.db
+*.sqlite3
