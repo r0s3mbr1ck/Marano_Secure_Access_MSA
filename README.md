@@ -286,14 +286,38 @@ The following components are **NOT included by default** and must be configured 
 Marano_Secure_Access_MSA/
 ├── app.py
 ├── requirements.txt
+├── .gitignore
+├── .env.example
 ├── templates/
-│   └── index.html
+│   ├── base.html
+│   ├── index.html
+│   ├── login.html
+│   ├── user_login.html
+│   ├── user_dashboard.html
+│   ├── user_request_access.html
+│   ├── user_change_password.html
+│   ├── change_password.html
+│   ├── create_vpn_profile.html
+│   ├── create_wireguard_profile.html
+│   ├── create_auth_profile.html
+│   ├── batch_auth_profiles.html
+│   ├── batch_auth_profiles_csv.html
+│   ├── revoke_access.html
+│   ├── revoked.html
+│   ├── connected.html
+│   ├── logs.html
+│   ├── registry.html
+│   ├── registry_export.html
+│   └── health.html
 ├── static/
 │   └── css/
 │       └── style.css
 ├── docs/
 │   └── images/
-└── examples/
+├── examples/
+├── registry/        # ignored by git
+├── data/            # ignored by git
+└── pki/             # ignored by git
 ```
 
 ---
