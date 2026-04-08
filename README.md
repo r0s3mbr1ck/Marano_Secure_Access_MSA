@@ -243,14 +243,41 @@ Features:
 
 ---
 
-## 🔐 Security Notes
+## 🔐 Infrastructure & PKI Notes
 
-- Use HTTPS in production (recommended: Nginx reverse proxy)
-- Restrict access to the web panel (firewall or VPN-only access)
-- Always enable MFA
-- Use one profile per device
-- Revoke compromised clients immediately
-- Never expose private keys or .ovpn files
+This project focuses on the **application layer (MSA dashboard and VPN management)**.
+
+The following components are **NOT included by default** and must be configured separately in a production environment:
+
+### 🌐 Reverse Proxy / HTTPS
+- It is **strongly recommended** to use a reverse proxy such as Nginx
+- TLS certificates (Let's Encrypt or internal CA) must be configured externally
+- The application runs by default on an internal port (e.g., 8000)
+
+### 🔑 PKI (Certificates & Keys)
+- VPN certificates and keys are **not managed automatically (yet)**
+- You must provide or integrate:
+  - Certificate Authority (CA)
+  - Server certificates
+  - Client certificates
+- Never store private keys or sensitive material in this repository
+
+### 🔒 Security Recommendations
+- Restrict access to the web panel (VPN-only or firewall rules)
+- Use HTTPS in production
+- Enable MFA for administrative access (planned feature)
+- Use one VPN profile per device
+- Revoke compromised credentials immediately
+
+### 📡 Networking
+- Ensure proper port forwarding:
+  - UDP 1194 → OpenVPN
+  - UDP 51820 → WireGuard
+- If using DDNS, ensure it is properly configured
+
+---
+
+> ⚠️ This project is designed to be **self-hosted** and assumes basic knowledge of networking, PKI, and server management.
 
 ---
 
