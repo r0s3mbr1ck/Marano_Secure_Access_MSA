@@ -175,6 +175,7 @@ flowchart TD
     MSA["MSA (VPN Gateway)\nOpenVPN + WireGuard\nWeb Panel (FastAPI)"]
 
     Internet --> Router --> Proxmox --> MSA
+```
 
 > [!tip]
 > - If you don’t have a public static IP, use DDNS.
