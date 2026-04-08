@@ -79,25 +79,34 @@ It goes beyond a simple VPN installer by providing:
 
 MSA is structured in four layers:
 
+MSA is composed of four main layers:
+
 ### 🔹 Access Layer
-- OpenVPN  
-- WireGuard  
+- OpenVPN (Certificate / Auth)
+- WireGuard
 
 ### 🔹 Identity Layer
-- Easy-RSA PKI  
-- Optional credential-based authentication  
-- MFA (TOTP)  
+- Email-based identity
+- SQLite user database
+- Unique email enforcement
+- Password hashing (Werkzeug)
+
+### 🔹 Access Control Layer
+- MFA (admin)
+- Token-based authentication (user portal)
+- Session management
 
 ### 🔹 Management Layer
-- Flask Web Dashboard  
-- Registry engine  
+- Flask Web UI
+- Registry engine (CSV)
 
 ### 🔹 Delivery Layer
-- Profile download  
-- Email delivery  
-- Telegram delivery  
+- Email (mandatory)
+- Telegram (optional)
+- Direct download
 
 ---
+
 ## 🌍 Deployment (Real-world Example)
 
 Typical home/lab setup:
