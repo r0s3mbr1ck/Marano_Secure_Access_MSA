@@ -98,71 +98,6 @@ MSA is structured in four layers:
 - Telegram delivery  
 
 ---
-
-## 📦 Installation
-
-### 1. Install dependencies
-
-```bash
-apt update
-apt install -y openvpn easy-rsa wireguard iptables-persistent python3 python3-pip nginx
-```
-
----
-
-2. Clone project
-```bash
-git clone https://github.com/YOUR_USER/msa.git
-cd msa
-```
-
----
-
-3. Setup environment
-```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-```
-
----
-
-4. Configure environment
-```bash
-nano /root/.config/msa.env
-```
-
-Example:
-```bash
-MSA_WEB_SECRET=CHANGE_ME
-
-MSA_ADMIN_USER=admin
-MSA_ADMIN_PASS=CHANGE_ME
-MSA_ADMIN_TOTP_SECRET=CHANGE_ME
-
-MSA_TG_BOT_TOKEN=CHANGE_ME
-MSA_TG_CHAT_ID=CHANGE_ME
-
-MSA_SMTP_HOST=smtp.example.com
-MSA_SMTP_PORT=465
-MSA_SMTP_USER=CHANGE_ME
-MSA_SMTP_PASS=CHANGE_ME
-MSA_SMTP_FROM=CHANGE_ME
-```
-
----
-
-5. Run
-```bash
-python3 app.py
-```
-Access:
-
-http://127.0.0.1:8080
-
-
----
-
 ## 🌍 Deployment (Real-world Example)
 
 Typical home/lab setup:
@@ -189,16 +124,83 @@ flowchart TD
     MSA --> Services
 ```
 
-> [!tip]
-> - If you don’t have a public static IP, use DDNS.
-> 
-> - If ports 80/443 are blocked: use a high port (e.g. 8443) and remember of redirect ports
-> 
-> - Generate app password from mail account and one token of telegram bot to configure .env
-> 
-> - Always validate: curl ifconfig.me
-> 
-> - If behind CGNAT: VPN access from outside will not work without workaround (e.g. VPS relay)
+## 🔐 Identity & Access Model
+
+MSA enforces a **strict identity model**:
+
+- 📧 One user = one email (unique)
+- 🔐 Email is the primary identity
+- 🔁 Self-service access recovery via secure tokens
+- ⏳ Time-limited access links (one-time use)
+
+This ensures:
+
+- traceability
+- secure onboarding
+- controlled access recovery
+- zero dependency on administrators
+
+---
+
+## 🔁 Self-Service Access Recovery
+
+Users without credentials (e.g. certificate-only or WireGuard) can request access via:
+
+👉 **User Portal → Request Access**
+
+Flow:
+
+1. User enters username
+2. System validates eligibility
+3. A **secure token link** is sent via email
+4. User accesses the portal without password
+5. Token is:
+   - time-limited
+   - single-use
+   - automatically invalidated after login
+
+---
+
+## 🚫 Security Design Decisions
+
+- No email → ❌ no user creation
+- No duplicate emails → ❌ blocked at DB level
+- No token reuse → ❌ prevented
+- No user enumeration → ❌ generic responses
+
+---
+
+## 📬 Profile Delivery Strategy
+
+MSA enforces **email as a required delivery channel**.
+
+Each user receives:
+
+- VPN profile
+- Access instructions
+- Portal URL
+- Recovery instructions
+
+This ensures:
+
+- access continuity even without VPN
+- self-service capability
+- reduced operational overhead
+
+---
+
+## 🌐 User Portal
+
+The User Portal provides:
+
+- Profile download
+- Password change (for auth users)
+- Access instructions per VPN type
+- Secure access via token (email-based)
+
+👉 Accessible even without VPN (recommended deployment)
+
+---
 
 ---
 
@@ -209,7 +211,6 @@ MSA supports:
 - Certificate + Credentials + Send temporary password + Reset (Resend)
 - WireGuard peer-based access
 - MFA for admin login
-
 
 ---
 
@@ -321,6 +322,80 @@ Marano_Secure_Access_MSA/
 ```
 
 ---
+
+## 📦 Installation
+
+### 1. Install dependencies
+
+```bash
+apt update
+apt install -y openvpn easy-rsa wireguard iptables-persistent python3 python3-pip nginx
+```
+
+---
+
+2. Clone project
+```bash
+git clone https://github.com/YOUR_USER/msa.git
+cd msa
+```
+
+---
+
+3. Setup environment
+```bash
+python3 -m venv venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+---
+
+4. Configure environment
+```bash
+nano /root/.config/msa.env
+```
+
+Example:
+```bash
+MSA_WEB_SECRET=CHANGE_ME
+
+MSA_ADMIN_USER=admin
+MSA_ADMIN_PASS=CHANGE_ME
+MSA_ADMIN_TOTP_SECRET=CHANGE_ME
+
+MSA_TG_BOT_TOKEN=CHANGE_ME
+MSA_TG_CHAT_ID=CHANGE_ME
+
+MSA_SMTP_HOST=smtp.example.com
+MSA_SMTP_PORT=465
+MSA_SMTP_USER=CHANGE_ME
+MSA_SMTP_PASS=CHANGE_ME
+MSA_SMTP_FROM=CHANGE_ME
+```
+
+---
+
+5. Run
+```bash
+python3 app.py
+```
+Access:
+
+http://127.0.0.1:8080
+
+---
+
+> [!tip]
+> - If you don’t have a public static IP, use DDNS.
+> 
+> - If ports 80/443 are blocked: use a high port (e.g. 8443) and remember of redirect ports
+> 
+> - Generate app password from mail account and one token of telegram bot to configure .env
+> 
+> - Always validate: curl ifconfig.me
+> 
+> - If behind CGNAT: VPN access from outside will not work without workaround (e.g. VPS relay)
 
 ## 🚀 Roadmap
 
