@@ -179,6 +179,18 @@ Flow:
 
 ---
 
+### 🔐 Security Model
+
+Zero trust between access types
+
+Token-based escalation (controlled)
+
+Email ownership = identity proof
+
+Strong separation between admin and user flows
+
+---
+
 ## 📬 Profile Delivery Strategy
 
 MSA enforces **email as a required delivery channel**.
@@ -208,8 +220,6 @@ The User Portal provides:
 - Secure access via token (email-based)
 
 👉 Accessible even without VPN (recommended deployment)
-
----
 
 ---
 
