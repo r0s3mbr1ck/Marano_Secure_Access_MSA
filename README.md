@@ -1,6 +1,6 @@
 <div align="center">
   <h1>
-    <img src="docs/images/msa-favicon.svg" width="35" valign="middle">
+    <img src="docs/images/msa-favicon.svg" width="36" style="vertical-align: middle; margin-right: 8px;">
     Marano Secure Access (MSA)
   </h1>
 </div>
@@ -21,7 +21,7 @@
 - 🌐 OpenVPN + WireGuard support  
 - 🧠 Registry-based lifecycle management  
 - 📦 Profile delivery (Download / Email / Telegram)  
-- ⚙️ CLI + Web automation  
+- ⚙️ Web automation  
 - 🚫 No user limits  
 - 🧩 Full PKI ownership  
 
@@ -29,20 +29,18 @@
 
 ## 🧠 What is MSA?
 
-**Marano Secure Access (MSA)** is a **self-hosted secure access platform** designed to manage VPN access with full control over identity, lifecycle and distribution.
+**Marano Secure Access (MSA)** is a **self-hosted secure access platform** designed to manage VPN access with full control over identity, lifecycle, and distribution.
 
-It is not just a VPN installer.
+It goes beyond a simple VPN installer by providing:
 
-It provides:
+- identity-aware access  
+- certificate lifecycle management  
+- hybrid authentication (certificate + credentials)  
+- centralized registry tracking  
+- operational visibility  
+- automation-ready workflows  
 
-- identity-aware access
-- certificate lifecycle management
-- hybrid authentication (certificate + credentials)
-- centralized registry tracking
-- operational visibility
-- automation-ready workflows
-
-👉 Built for real-world environments (labs, cyber training, internal infrastructure).
+👉 Built for real-world environments such as homelabs, cyber training platforms, and internal infrastructure.
 
 ---
 
@@ -69,26 +67,25 @@ It provides:
 
 ## 🧱 Architecture
 
-MSA is composed of:
+MSA is structured in four layers:
 
 ### 🔹 Access Layer
-- OpenVPN
-- WireGuard
+- OpenVPN  
+- WireGuard  
 
 ### 🔹 Identity Layer
-- Easy-RSA PKI
-- Credential-based authentication (optional)
-- MFA (TOTP)
+- Easy-RSA PKI  
+- Optional credential-based authentication  
+- MFA (TOTP)  
 
 ### 🔹 Management Layer
-- Flask Web Dashboard
-- CLI automation
-- Registry engine
+- Flask Web Dashboard  
+- Registry engine  
 
 ### 🔹 Delivery Layer
-- Download
-- Email
-- Telegram
+- Profile download  
+- Email delivery  
+- Telegram delivery  
 
 ---
 
@@ -104,7 +101,6 @@ apt install -y openvpn easy-rsa wireguard iptables-persistent python3 python3-pi
 ---
 
 2. Clone project
-
 ```bash
 git clone https://github.com/YOUR_USER/msa.git
 cd msa
@@ -125,8 +121,9 @@ pip install -r requirements.txt
 ```bash
 nano /root/.config/msa.env
 ```
+
 Example:
-```conf
+```bash
 MSA_WEB_SECRET=CHANGE_ME
 
 MSA_ADMIN_USER=admin
@@ -142,13 +139,13 @@ MSA_SMTP_USER=CHANGE_ME
 MSA_SMTP_PASS=CHANGE_ME
 MSA_SMTP_FROM=CHANGE_ME
 ```
+
 ---
 
 5. Run
 ```bash
 python3 app.py
 ```
-
 Access:
 
 http://127.0.0.1:8080
@@ -156,134 +153,94 @@ http://127.0.0.1:8080
 
 ---
 
-🌍 Deployment (Example)
+## 🌍 Deployment (Real-world Example)
 
 Typical home/lab setup:
 
 Internet
    |
-[ Router + DDNS ]
+[ Router / ISP ]
+  - DDNS configured (e.g. no-ip, duckdns)
+  - Port forwarding:
+      UDP 1194  → OpenVPN
+      UDP 51820 → WireGuard
+      TCP 80/443 → Web Panel (optional)
    |
 [ Proxmox Host ]
    |
-[ MSA Container ]
+[ MSA Container / VM ]
    ├── OpenVPN
    ├── WireGuard
-   ├── Web Panel
+   ├── Flask Web Panel
 
+> [!tip]
+> If you don’t have a public static IP, use DDNS.
+> 
+> If ports 80/443 are blocked: use a high port (e.g. 8443) and remember of redirect ports
+> 
+> generate app password from mail account and one token of telegram bot.
+> 
+> Always validate: curl ifconfig.me
+> 
+> If behind CGNAT: VPN access from outside will not work without workaround (e.g. VPS relay)
 
 ---
 
-🔐 Authentication Modes
+## 🔐 Authentication Modes
 
 MSA supports:
-
-Certificate only (OpenVPN)
-
-Certificate + Credentials
-
-WireGuard peer-based access
-
-MFA for admin login
+- Certificate only (OpenVPN)
+- Certificate + Credentials
+- WireGuard peer-based access
+- MFA for admin login
 
 
 
 ---
 
-🗂️ Registry System
-
+## 🗂️ Registry System
 MSA includes a registry engine that tracks:
-
-active clients
-
-revoked clients
-
-profile types
-
-lifecycle state
+- active clients
+- revoked clients
+- profile types
+- lifecycle state
 
 
-Supported operations:
-
-auto-registration on creation
-
-revoke tracking
-
-rebuild from system state
-
-export
-
-
+## Supported operations:
+- auto-registration on creation
+- revoke tracking
+- rebuild from system state
+- export
 
 ---
 
-🌐 Web Panel
+## 🌐 Web Panel
 
 Features:
-
-Dashboard
-
-Issued clients
-
-Connected clients
-
-Profile creation
-
-Revoke / Remove peer
-
-Logs
-
-Server health
-
-Registry management
-
-
+- Dashboard
+- Issued clients
+- Connected clients
+- Profile creation
+- Revoke / Remove peer
+- Logs
+- Server health
+- Registry management
 
 ---
 
-💻 CLI
+## 🔐 Security Notes
 
-Script:
-
-scripts/ovpn-menu.sh
-
-Capabilities:
-
-create clients
-
-generate profiles
-
-revoke by CN / ID / range
-
-automation
-
-logs / health
-
-
+- Use HTTPS in production (recommended: Nginx reverse proxy)
+- Restrict access to the web panel (firewall or VPN-only access)
+- Always enable MFA
+- Use one profile per device
+- Revoke compromised clients immediately
+- Never expose private keys or .ovpn files
 
 ---
 
-🔐 Security Notes
+## 📁 Project Structure
 
-Use HTTPS in production
-
-Protect admin credentials
-
-Enable MFA
-
-Use one profile per device
-
-Revoke compromised clients immediately
-
-Do not expose private keys
-
-
-
----
-
-📁 Project Structure
-
-.
 ├── app.py
 ├── requirements.txt
 ├── templates/
@@ -297,75 +254,50 @@ Do not expose private keys
 
 ---
 
-🚀 Roadmap
+## 🚀 Roadmap
 
-Short Term
-
-UI improvements
-
-safer bulk operations
-
-registry enhancements
-
-health dashboard improvements
+### Short Term
+- UI improvements
+- safer bulk operations
+- registry enhancements
+- improved health dashboard
 
 
-Mid Term
+### Mid Term
+- audit logs
+- RBAC (roles)
+- better filtering/search
+- backup/restore
 
-audit logs
-
-RBAC (roles)
-
-better filtering/search
-
-backup/restore
-
-
-Future
-
-API REST
-
-multi-admin support
-
-zero-trust model
-
-enterprise integration
-
-
+### Future
+- REST API
+- multi-admin support
+- zero-trust model
+- enterprise integration
 
 ---
 
-🤝 Contributing
+## 🤝 Contributing
 
 Contributions are welcome.
 
 Focus areas:
-
-security
-
-UI/UX
-
-automation
-
-documentation
-
-
+- security
+- UI/UX
+- automation
+- documentation
 
 ---
 
-📌 Final Notes
-
+## 📌 Final Notes
 MSA provides:
-
-full control
-
-self-hosted architecture
-
-OpenVPN + WireGuard
-
-MFA protection
-
-lifecycle management
+- full control
+- self-hosted architecture
+- OpenVPN + WireGuard
+- MFA protection
+- lifecycle management
 
 
-👉 Ideal for labs, cyber environments and controlled access infrastructures.
+## 👉 Ideal for labs, cyber environments, and controlled access infrastructures.
+
+---
