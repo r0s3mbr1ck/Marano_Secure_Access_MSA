@@ -1,4 +1,4 @@
-# <img src="docs/images/cover.png" width="30" height="30"> Marano Secure Access (MSA)
+# <img src="docs/images/msa-favicon.svg" width="30" height="30"> Marano Secure Access (MSA)
 
 <p align="center">
   <img src="docs/images/cover.png" width="900"/>
