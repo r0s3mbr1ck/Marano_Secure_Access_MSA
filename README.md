@@ -58,7 +58,7 @@ It goes beyond a simple VPN installer by providing:
 ### 🌐 Modern UI Webpage
 <img src="docs/images/modern_ui.gif" width="900"/>
 
-### 👤 Client Creation
+### 👤 Profile VPN creation
 <img src="docs/images/create_profile_vpn.gif" width="900"/>
 
 ### ✅ Bulk VPN profile creation 
