@@ -167,21 +167,34 @@ http://127.0.0.1:8080
 
 Typical home/lab setup:
 
-Internet
-   |
-[ Router / ISP ]
-  - DDNS configured (e.g. no-ip, duckdns)
-  - Port forwarding:
-      UDP 1194  → OpenVPN
-      UDP 51820 → WireGuard
-      TCP 80/443 → Web Panel (optional)
-   |
-[ Proxmox Host ]
-   |
-[ MSA Container / VM ]
-   ├── OpenVPN
-   ├── WireGuard
-   ├── Flask Web Panel
+🌐 Internet
+                     │
+                     ▼
+        ┌──────────────────────────┐
+        │    Router / ISP (CPE)    │
+        │──────────────────────────│
+        │ • DDNS (No-IP / DuckDNS) │
+        │ • Port Forwarding:       │
+        │   - UDP 1194  → OpenVPN  │
+        │   - UDP 51820 → WireGuard│
+        │   - TCP 80/443 → Web UI  │
+        └────────────┬─────────────┘
+                     │
+                     ▼
+        ┌──────────────────────────┐
+        │      Proxmox Host        │
+        │──────────────────────────│
+        │ • VM / Container (MSA)   │
+        └────────────┬─────────────┘
+                     │
+                     ▼
+        ┌──────────────────────────┐
+        │   MSA (VPN Gateway)      │
+        │──────────────────────────│
+        │ • OpenVPN Server         │
+        │ • WireGuard Server       │
+        │ • Web Panel (FastAPI)    │
+        └──────────────────────────┘
 
 > [!tip]
 > - If you don’t have a public static IP, use DDNS.
