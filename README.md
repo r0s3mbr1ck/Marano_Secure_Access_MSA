@@ -255,15 +255,14 @@ Features:
 ---
 
 ## 📁 Project Structure
-
+project/
 ├── app.py
 ├── requirements.txt
 ├── templates/
 ├── static/
 ├── docs/
-│   ├── images/
-├── examples/
-
+├── images/
+└── examples/
 
 ---
 
