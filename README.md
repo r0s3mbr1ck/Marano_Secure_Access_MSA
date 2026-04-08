@@ -255,6 +255,7 @@ Features:
 ---
 
 ## 📁 Project Structure
+```text
 project/
 ├── app.py
 ├── requirements.txt
@@ -263,6 +264,7 @@ project/
 ├── docs/
 ├── images/
 └── examples/
+```
 
 ---
 
