@@ -1,4 +1,4 @@
-# 🛡️ Marano Secure Access (MSA)
+# Marano Secure Access (MSA)
 
 <p align="center">
   <img src="docs/images/cover.png" width="900"/>
