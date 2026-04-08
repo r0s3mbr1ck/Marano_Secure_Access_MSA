@@ -3,6 +3,7 @@ registry/
 data/
 db/
 *.json
+*csv
 
 # Certs / PKI
 pki/
