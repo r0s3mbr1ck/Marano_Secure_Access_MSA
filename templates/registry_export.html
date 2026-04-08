@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="max-width:1100px; margin:0 auto;">
+  <h2>Registry / Export</h2>
+  <div class="muted">
+    View the registry database and export the current registry file.
+  </div>
+
+  <div class="hr"></div>
+
+  <div class="actions" style="justify-content:center; margin-bottom:18px;">
+    <a class="btn btn-secondary" href="{{ url_for('download_registry') }}">
+      Download registry.csv
+    </a>
+  </div>
+
+  <div class="table-wrapper">
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>CN</th>
+          <th>Created At</th>
+          <th>Expires At</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if rows %}
+          {% for r in rows %}
+          <tr>
+            <td>{{ r['id'] }}</td>
+            <td>{{ r['cn'] }}</td>
+            <td>{{ r['created_at'] }}</td>
+            <td>{{ r['expires_at'] }}</td>
+            <td>{{ r['status'] }}</td>
+          </tr>
+          {% endfor %}
+        {% else %}
+          <tr>
+            <td colspan="5">Registry is empty.</td>
+          </tr>
+        {% endif %}
+	<form method="post" action="{{ url_for('rebuild_registry_route') }}">
+	  <button type="submit" class="btn-warn onclick="return confirm('Rebuild entire registry from system data?');">
+	    Rebuild Registry
+	  </button>
+	</form>
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+

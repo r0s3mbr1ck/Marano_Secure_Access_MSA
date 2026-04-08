@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="max-width:900px; margin:0 auto;">
+  <h2>Revoke Access</h2>
+  <div class="muted">
+    Revoke VPN access by client name, registry ID, or a range of IDs.
+  </div>
+
+  <div class="hr"></div>
+
+  <div class="grid" style="grid-template-columns:1fr; gap:20px;">
+    <div class="card">
+      <h2>Revoke by Client Name (CN)</h2>
+      <div class="muted">
+        Revoke a single certificate using the client common name.
+      </div>
+
+      <div class="hr"></div>
+
+      <form method="post" action="{{ url_for('revoke_cn_route') }}" onsubmit="return confirm('Revoke client, generate CRL and restart OpenVPN?');">
+        <label>Client name</label>
+        <input name="name" placeholder="alex-phone" required>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-danger">Revoke by CN</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Revoke by Registry ID</h2>
+      <div class="muted">
+        Revoke the latest active certificate associated with a registry ID.
+      </div>
+
+      <div class="hr"></div>
+
+      <form method="post" action="{{ url_for('revoke_id_route') }}" onsubmit="return confirm('Revoke registry ID, generate CRL and restart OpenVPN?');">
+        <label>Registry ID</label>
+        <input name="id" type="number" min="1" required>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-danger">Revoke by ID</button>
+        </div>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Revoke by ID Range</h2>
+      <div class="muted">
+        Revoke all active certificates found within a range of registry IDs.
+      </div>
+
+      <div class="hr"></div>
+
+      <form method="post" action="{{ url_for('revoke_range_route') }}" onsubmit="return confirm('Revoke the full range, generate CRL and restart OpenVPN?');">
+        <label>Start ID</label>
+        <input name="start" type="number" min="1" required>
+
+        <label>End ID</label>
+        <input name="end" type="number" min="1" required>
+
+        <div class="form-actions">
+          <button type="submit" class="btn-danger">Revoke Range</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

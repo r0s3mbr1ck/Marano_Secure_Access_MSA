@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="max-width:880px; margin:0 auto;">
+  <h2>Create VPN Profile</h2>
+  <div class="muted">
+    Create and deliver OpenVPN or WireGuard profiles from a single workflow.
+  </div>
+
+  <div class="hr"></div>
+
+  <form method="post" action="{{ url_for('create_vpn_profile_page') }}">
+    <label>VPN type</label>
+    <select name="vpn_type" id="vpn_type" onchange="toggleVpnFields()" required>
+      <option value="openvpn_cert">OpenVPN Certificate</option>
+      <option value="openvpn_auth">OpenVPN Certificate + Password</option>
+      <option value="wireguard">WireGuard</option>
+    </select>
+
+    <label>Client name / username</label>
+    <input name="name" placeholder="alex-note" required>
+
+    <label>Email (optional)</label>
+    <input name="email" type="email" placeholder="user@example.com">
+
+    <div id="auth_hint" style="display:none; margin-top:14px;" class="flash warn">
+      This mode creates a temporary password. The user must change it before VPN access is allowed.
+    </div>
+
+    <label style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:14px;">
+      <input type="checkbox" name="send_email" style="width:auto;">
+      <span>Send via email</span>
+    </label>
+
+    <label style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:14px;">
+      <input type="checkbox" name="send_telegram" style="width:auto;">
+      <span>Send via Telegram</span>
+    </label>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">Create VPN Profile</button>
+    </div>
+  </form>
+
+  {% if created %}
+    <div class="hr"></div>
+
+    <div class="flash ok">
+VPN type: {{ created.vpn_type }}
+Username: {{ created.username }}
+Profile: {{ created.profile_path }}
+{% if created.temporary_password %}
+Temporary password: {{ created.temporary_password }}
+{% endif %}
+    </div>
+
+    <div class="actions" style="justify-content:center; margin-top:14px;">
+      {% if created.vpn_type == 'wireguard' %}
+        <a class="btn btn-secondary" href="{{ url_for('download_wireguard', name=created.username) }}">Download .conf</a>
+      {% elif created.vpn_type == 'openvpn_auth' %}
+        <a class="btn btn-secondary" href="{{ url_for('download_auth_ovpn', name=created.username) }}">Download Auth .ovpn</a>
+      {% else %}
+        <a class="btn btn-secondary" href="{{ url_for('download_ovpn', name=created.username) }}">Download .ovpn</a>
+      {% endif %}
+    </div>
+
+    {% if created.vpn_type == 'wireguard' %}
+      <div class="hr"></div>
+      <h3 style="text-align:center;">WireGuard QR Code</h3>
+      <div style="display:flex; justify-content:center; margin-top:14px;">
+        <img
+          src="{{ url_for('wireguard_qr', name=created.username) }}?v={{ created.username }}"
+          alt="WireGuard QR Code"
+          style="display:block; max-width:320px; width:100%; background:#fff; padding:12px; border-radius:16px;"
+        >
+      </div>
+    {% endif %}
+  {% endif %}
+</div>
+
+<script>
+function toggleVpnFields() {
+  const vpnType = document.getElementById("vpn_type").value;
+  const authHint = document.getElementById("auth_hint");
+  authHint.style.display = (vpnType === "openvpn_auth") ? "block" : "none";
+}
+document.addEventListener("DOMContentLoaded", toggleVpnFields);
+</script>
+{% endblock %}

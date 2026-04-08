@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="max-width:820px; margin:0 auto;">
+  <h2>Create WireGuard Profile</h2>
+
+  <div class="muted">
+    This will generate a WireGuard client configuration.
+  </div>
+
+  <div class="hr"></div>
+
+  <form method="post" action="{{ url_for('create_wireguard_profile_page') }}">
+    <label>Client name</label>
+    <input name="name" placeholder="alex-wg1" required>
+
+    <label>Email (optional)</label>
+    <input name="email" type="email">
+
+    <label style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:14px;">
+      <input type="checkbox" name="auto_send_email" style="width:auto;">
+      <span>Send via email</span>
+    </label>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">Create WireGuard</button>
+    </div>
+  </form>
+
+  {% if created %}
+    <div class="hr"></div>
+
+    <div class="flash ok">
+WireGuard profile created:
+{{ created.profile_path }}
+    </div>
+
+    <div class="actions" style="justify-content:center; margin-top:14px;">
+      <a class="btn btn-secondary" href="{{ url_for('download_wireguard', name=created.username) }}">
+        Download .conf
+      </a>
+    </div>
+
+    <div class="hr"></div>
+
+    <h3 style="text-align:center;">WireGuard QR Code</h3>
+    <div style="display:flex; justify-content:center; margin-top:14px;">
+      <img
+        src="{{ url_for('wireguard_qr', name=created.username) }}"
+        alt="WireGuard QR Code"
+        style="max-width:320px; width:100%; background:#fff; padding:12px; border-radius:16px;"
+      >
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

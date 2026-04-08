@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="max-width:1000px; margin:0 auto;">
+  <h2>Batch Create Auth Profiles (CSV)</h2>
+  <div class="muted">
+    Upload a CSV file with <b>username,email</b> and create certificate + password VPN profiles with optional email delivery.
+  </div>
+
+  <div class="hr"></div>
+
+  <form method="post" action="{{ url_for('batch_auth_profiles_csv_page') }}" enctype="multipart/form-data">
+    <label>CSV file</label>
+    <input name="csv_file" type="file" accept=".csv" required>
+
+    <label style="margin-top:14px;">
+      <input type="checkbox" name="auto_send_email" checked>
+      Send profiles by email automatically
+    </label>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">Run CSV Batch</button>
+    </div>
+  </form>
+
+  <div class="hr"></div>
+
+  <div class="flash warn">
+Expected CSV format:
+
+username,email
+lab-1,alice@example.com
+lab-2,bob@example.com
+lab-3,charlie@example.com
+  </div>
+
+  {% if results %}
+    <div class="hr"></div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Temporary Password</th>
+            <th>Profile</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in results %}
+          <tr>
+            <td>{{ item.username }}</td>
+            <td>{{ item.email }}</td>
+            <td>{{ item.temporary_password }}</td>
+            <td>{{ item.profile_path }}</td>
+            <td>{{ item.status }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

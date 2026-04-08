@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="card table-card">
+  <h2>
+    <span class="card-icon icon-connected" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M8.5 16.5a5.5 5.5 0 0 1 7 0"/>
+        <path d="M5 13a10 10 0 0 1 14 0"/>
+        <path d="M2 9.5a14 14 0 0 1 20 0"/>
+        <path d="M12 20h.01"/>
+      </svg>
+    </span>
+    Connected Clients
+  </h2>
+
+  <div class="connected-desktop">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Public IP</th>
+            <th>IP VPN</th>
+            <th>Received</th>
+            <th>Sent</th>
+            <th>Connected Since</th>
+            <th>Cipher</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for c in clients %}
+          <tr>
+            <td>
+              <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <span>{{ c.common_name }}</span>
+                <span class="status-online">ONLINE</span>
+              </div>
+            </td>
+            <td>{{ c.real_address }}</td>
+            <td>{{ c.virtual_address }}</td>
+            <td>{{ c.rx }}</td>
+            <td>{{ c.tx }}</td>
+            <td>{{ c.connected_since }}</td>
+            <td>{{ c.cipher }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="7">No connected clients</td></tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="connected-mobile">
+    {% for c in clients %}
+    <div class="mobile-card connected-card">
+      <div class="mobile-card-title">
+        <span>{{ c.common_name }}</span>
+        <span class="status-online">ONLINE</span>
+      </div>
+
+      <div class="mobile-card-info">
+        <div><strong>Public:</strong> {{ c.real_address }}</div>
+        <div><strong>VPN:</strong> {{ c.virtual_address }}</div>
+        <div><strong>RX:</strong> {{ c.rx }}</div>
+        <div><strong>TX:</strong> {{ c.tx }}</div>
+        <div><strong>Since:</strong> {{ c.connected_since }}</div>
+        <div><strong>Cipher:</strong> {{ c.cipher }}</div>
+      </div>
+    </div>
+    {% else %}
+    <div class="muted">No connected clients</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

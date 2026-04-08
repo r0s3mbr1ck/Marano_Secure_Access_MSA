@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="max-width:820px; margin:0 auto;">
+  <h2>Create Certificate + Password Profile</h2>
+  <div class="muted">
+    This mode requires both a valid client certificate and a username/password. The first password must be changed in the portal before VPN access is allowed.
+  </div>
+
+  <div class="hr"></div>
+
+  <form method="post" action="{{ url_for('create_auth_profile_page') }}">
+    <label>Client name / username</label>
+    <input name="name" placeholder="alex-note" required>
+
+    <label>Email (optional)</label>
+    <input name="email" type="email" placeholder="user@example.com">
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">Create Auth Profile</button>
+    </div>
+  </form>
+
+  {% if created %}
+    <div class="hr"></div>
+
+    <div class="flash ok">
+Username: {{ created.username }}
+Temporary password: {{ created.temporary_password }}
+Profile: {{ created.profile_path }}
+
+Important:
+- This password is temporary
+- The user must access the Change Password page before using the VPN auth profile
+    </div>
+
+    <div class="actions" style="justify-content:center; margin-top:14px;">
+      <a class="btn btn-secondary" href="{{ url_for('download_auth_ovpn', name=created.username) }}">
+        Download Auth .ovpn
+      </a>
+
+      <form method="post" action="{{ url_for('send_auth_telegram_route') }}">
+        <input type="hidden" name="name" value="{{ created.username }}">
+        <button type="submit" class="btn-warn">Send Telegram</button>
+      </form>
+
+      <form method="post" action="{{ url_for('send_auth_email_route') }}">
+        <input type="hidden" name="name" value="{{ created.username }}">
+        <input type="hidden" name="email" value="{{ created.email }}">
+        <input type="hidden" name="temporary_password" value="{{ created.temporary_password }}">
+        <button type="submit" class="btn-primary">Send Email</button>
+      </form>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

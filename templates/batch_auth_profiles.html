@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card" style="max-width:1000px; margin:0 auto;">
+  <h2>Batch Create Auth Profiles</h2>
+  <div class="muted">
+    Create multiple certificate + password VPN profiles and optionally send them by email.
+  </div>
+
+  <div class="hr"></div>
+
+  <form method="post" action="{{ url_for('batch_auth_profiles_page') }}">
+    <label>Username prefix</label>
+    <input name="prefix" placeholder="user-" required>
+
+    <label>Start number</label>
+    <input name="start" type="number" min="1" required>
+
+    <label>End number</label>
+    <input name="end" type="number" min="1" required>
+
+    <label>Email domain (optional)</label>
+    <input name="email_domain" placeholder="example.com">
+
+    <label style="margin-top:14px;">
+      <input type="checkbox" name="auto_send_email">
+      Send profiles by email automatically
+    </label>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">Run Batch</button>
+    </div>
+  </form>
+
+  {% if results %}
+    <div class="hr"></div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Temporary Password</th>
+            <th>Profile</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in results %}
+          <tr>
+            <td>{{ item.username }}</td>
+            <td>{{ item.email }}</td>
+            <td>{{ item.temporary_password }}</td>
+            <td>{{ item.profile_path }}</td>
+            <td>{{ item.status }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% endif %}
+
+  {% if sent %}
+    <div class="hr"></div>
+    <div class="flash ok">
+Email sent successfully to: {{ sent | join(', ') }}
+    </div>
+  {% endif %}
+
+  {% if failed %}
+    <div class="flash warn">
+Email failures: {{ failed | join(', ') }}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

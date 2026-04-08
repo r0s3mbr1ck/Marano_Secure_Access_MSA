@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}MSA{% endblock %}</title>
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='img/msa-favicon.svg') }}">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<script>
+function handleRevokeConfirm(form, clientName, accessType) {
+  const actionText = accessType === "WireGuard" ? "Remove peer" : "Revoke";
+  const confirmAction = confirm(`${actionText} ${clientName}?`);
+
+  if (!confirmAction) {
+    return false;
+  }
+
+  const hiddenField = form.querySelector('input[name="restart_now"]');
+
+  if (accessType === "WireGuard") {
+    if (hiddenField) {
+      hiddenField.value = "no";
+    }
+    return true;
+  }
+
+  const restartNow = confirm("Do you want to restart OpenVPN now?");
+  if (hiddenField) {
+    hiddenField.value = restartNow ? "yes" : "no";
+  }
+
+  return true;
+}
+</script>
+<button class="menu-toggle" onclick="toggleSidebar()" aria-label="Open menu">
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
+
+<div id="sidebar" class="sidebar">
+  <nav class="sidebar-nav">
+
+    <a class="{{ 'active' if active_page == 'index' else '' }}" href="{{ url_for('index') }}">
+      <span class="sidebar-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M3 10.5 12 3l9 7.5"/>
+          <path d="M5 9.5V21h14V9.5"/>
+        </svg>
+      </span>
+      <span>Dashboard</span>
+    </a>
+
+    <a class="{{ 'active' if active_page == 'create_vpn_profile' else '' }}" href="{{ url_for('create_vpn_profile_page') }}">
+      <span class="sidebar-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M12 2 5 5v6c0 5 3.5 8 7 11 3.5-3 7-6 7-11V5z"/>
+          <path d="M8 12h8"/>
+          <path d="M12 8v8"/>
+        </svg>
+      </span>
+      <span>Create VPN Profile</span>
+    </a>
+
+    <a class="{{ 'active' if active_page == 'batch_auth_profiles_csv' else '' }}" href="{{ url_for('batch_auth_profiles_csv_page') }}">
+      <span class="sidebar-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M4 7h16"/>
+          <path d="M4 12h16"/>
+          <path d="M4 17h16"/>
+          <path d="M9 4v16"/>
+        </svg>
+      </span>
+      <span>Batch Auth Profiles CSV</span>
+    </a>
+
+    <a class="{{ 'active' if active_page == 'revoke_access' else '' }}" href="{{ url_for('revoke_access_page') }}">
+      <span class="sidebar-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-4 8 4z"/>
+          <path d="m9.5 9.5 5 5"/>
+          <path d="m14.5 9.5-5 5"/>
+        </svg>
+      </span>
+      <span>Revoke Access</span>
+    </a>
+
+    <a class="{{ 'active' if active_page == 'registry_export' else '' }}" href="{{ url_for('registry_export_page') }}">
+      <span class="sidebar-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <ellipse cx="12" cy="5" rx="9" ry="3"/>
+          <path d="M3 5v14c0 1.7 4 3 9 3s9-1.3 9-3V5"/>
+          <path d="M3 12c0 1.7 4 3 9 3s9-1.3 9-3"/>
+        </svg>
+      </span>
+      <span>Registry / Export</span>
+    </a>
+
+    <a class="{{ 'active' if active_page == 'connected' else '' }}" href="{{ url_for('connected_page') }}">
+      <span class="sidebar-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M8.5 16.5a5.5 5.5 0 0 1 7 0"/>
+          <path d="M5 13a10 10 0 0 1 14 0"/>
+          <path d="M2 9.5a14 14 0 0 1 20 0"/>
+          <path d="M12 20h.01"/>
+        </svg>
+      </span>
+      <span>Connected</span>
+    </a>
+
+    <a class="{{ 'active' if active_page == 'revoked' else '' }}" href="{{ url_for('revoked_page') }}">
+      <span class="sidebar-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M20 13c0 5-3.5 7.5-8 9-4.5-1.5-8-4-8-9V6l8-4 8 4z"/>
+          <path d="m9.5 9.5 5 5"/>
+          <path d="m14.5 9.5-5 5"/>
+        </svg>
+      </span>
+      <span>Revoked</span>
+    </a>
+
+    <a class="{{ 'active' if active_page == 'logs' else '' }}" href="{{ url_for('logs_page') }}">
+      <span class="sidebar-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16l4-2 4 2 4-2 4 2V8z"/>
+          <path d="M8 10h8"/>
+          <path d="M8 14h8"/>
+        </svg>
+      </span>
+      <span>Logs</span>
+    </a>
+
+    <a class="{{ 'active' if active_page == 'health' else '' }}" href="{{ url_for('health_page') }}">
+      <span class="sidebar-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M8 2v4"/>
+          <path d="M16 2v4"/>
+          <path d="M3 10h18"/>
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <path d="M9 16h6"/>
+          <path d="M12 13v6"/>
+        </svg>
+      </span>
+      <span>Server Health</span>
+    </a>
+
+    <a class="{{ 'active' if active_page == 'change_password' else '' }}" href="{{ url_for('change_password_page') }}">
+      <span class="sidebar-icon" aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+          <path d="M12 17v.01"/>
+          <path d="M15 10V7a3 3 0 1 0-6 0v3"/>
+          <rect x="5" y="10" width="14" height="11" rx="2"/>
+        </svg>
+      </span>
+      <span>Change Password</span>
+    </a>
+
+    <form method="post" action="{{ url_for('restart_vpn_and_nginx_route') }}" onsubmit="return confirm('Restart OpenVPN and nginx now?');" style="margin:0;">
+      <button type="submit" class="sidebar-action-btn sidebar-action-danger">
+        <span class="sidebar-icon" aria-hidden="true">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M21 12a9 9 0 1 1-2.64-6.36"/>
+            <path d="M21 3v6h-6"/>
+          </svg>
+        </span>
+        <span>Restart Services</span>
+      </button>
+    </form>
+
+  </nav>
+</div>
+
+<div id="sidebar-backdrop" class="sidebar-backdrop" onclick="closeSidebar()"></div>
+
+<div id="main-shell" class="main-shell">
+  <div class="container">
+    <div class="header">
+     <div class="header-center">
+      <img class="header-logo" src="{{ url_for('static', filename='img/msa-favicon.svg') }}" alt="MSA Logo">
+      <span class="header-title-text">Marano Secure Access (MSA)</span>
+     </div>
+
+    <div class="header-userbar">
+     {% if session.get('admin_user') %}
+      <div class="header-user-pill">
+       <span class="header-user-label">Logged as</span>
+       <span class="header-user-name">{{ session.get('admin_user') }}</span>
+      </div>
+     {% endif %}
+
+     <a href="{{ url_for('logout') }}" class="header-logout-btn">Logout</a>
+    </div>
+   </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="flash {{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+  </div>
+</div>
+
+<footer class="app-footer">
+  <div class="app-footer-left">
+    Marano Secure Access (MSA) · Version 1.0
+  </div>
+</footer>
+
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
