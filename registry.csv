@@ -1,0 +1,107 @@
+id,cn,type,status,created_at,expires_at
+1,alex-phone,Certificate,revoked,,2028-04-11 23:58:35
+2,alex-notebook,Certificate,revoked,,2028-04-11 23:58:58
+3,teste2,Certificate,revoked,,2028-04-12 00:51:52
+4,teste,Certificate,revoked,,2028-04-12 00:54:42
+5,alex-note,Certificate,active,,2028-04-12 01:09:59
+6,alex-phone,Certificate,active,,2028-04-12 01:16:14
+7,kali-note,Certificate,active,,2028-04-12 02:12:47
+8,alex-work,Certificate,active,,2028-04-16 14:02:52
+9,teste,Certificate,revoked,,2028-04-16 23:09:04
+10,andrade,Certificate,revoked,,2028-04-24 00:02:45
+11,kali2,Certificate,revoked,,2028-04-26 22:52:04
+12,vpn-001,Certificate,revoked,,2028-04-27 21:50:07
+13,vpn-002,Certificate,revoked,,2028-04-27 21:50:15
+14,vpn-003,Certificate,revoked,,2028-04-27 22:34:03
+15,vpn-004,Certificate,revoked,,2028-04-27 22:34:03
+16,vpn-005,Certificate,revoked,,2028-04-27 22:34:03
+17,vpn-006,Certificate,revoked,,2028-04-27 22:34:04
+18,vpn-007,Certificate,revoked,,2028-04-27 22:34:04
+19,vpn-008,Certificate,revoked,,2028-04-27 22:34:04
+20,vpn-009,Certificate,revoked,,2028-04-27 22:34:05
+21,vpn-010,Certificate,revoked,,2028-04-27 22:34:05
+22,vpn-001,Certificate,revoked,,2028-04-27 22:51:12
+23,vpn-002,Certificate,revoked,,2028-04-27 22:51:12
+24,vpn-003,Certificate,revoked,,2028-04-27 22:51:12
+25,vpn-004,Certificate,revoked,,2028-04-27 22:51:12
+26,vpn-005,Certificate,revoked,,2028-04-27 22:51:13
+27,vpn-006,Certificate,revoked,,2028-04-27 22:51:13
+28,vpn-007,Certificate,revoked,,2028-04-27 22:51:13
+29,vpn-008,Certificate,revoked,,2028-04-27 22:51:14
+30,vpn-009,Certificate,revoked,,2028-04-27 22:51:14
+31,vpn-010,Certificate,revoked,,2028-04-27 22:51:15
+32,vpn-001,Certificate,revoked,,2028-04-27 23:08:16
+33,vpn-002,Certificate,revoked,,2028-04-27 23:08:17
+34,vpn-003,Certificate,revoked,,2028-04-27 23:08:17
+35,vpn-004,Certificate,revoked,,2028-04-27 23:08:17
+36,vpn-005,Certificate,revoked,,2028-04-27 23:08:17
+37,vpn-006,Certificate,revoked,,2028-04-27 23:08:18
+38,vpn-007,Certificate,revoked,,2028-04-27 23:08:18
+39,vpn-008,Certificate,revoked,,2028-04-27 23:08:18
+40,vpn-009,Certificate,revoked,,2028-04-27 23:08:19
+41,vpn-010,Certificate,revoked,,2028-04-27 23:08:19
+42,vpn-010,Certificate,revoked,,2028-04-27 23:13:01
+43,vpn-001,Certificate,revoked,,2028-04-27 23:20:49
+44,vpn-002,Certificate,revoked,,2028-04-27 23:20:50
+45,vpn-003,Certificate,revoked,,2028-04-27 23:20:50
+46,vpn-004,Certificate,revoked,,2028-04-27 23:20:50
+47,vpn-005,Certificate,revoked,,2028-04-27 23:20:50
+48,vpn-006,Certificate,revoked,,2028-04-27 23:20:51
+49,vpn-007,Certificate,revoked,,2028-04-27 23:20:51
+50,vpn-008,Certificate,revoked,,2028-04-27 23:20:51
+51,vpn-009,Certificate,revoked,,2028-04-27 23:20:52
+52,vpn-010,Certificate,revoked,,2028-04-27 23:20:52
+53,rodrigues,Certificate,revoked,,2028-05-08 12:11:16
+54,jitsi.home,Certificate,revoked,,2028-05-16 22:44:38
+55,vpn-001,Certificate,revoked,,2028-05-17 12:00:59
+56,vpn-002,Certificate,revoked,,2028-05-17 12:00:59
+57,vpn-003,Certificate,revoked,,2028-05-17 12:01:00
+58,vpn-004,Certificate,revoked,,2028-05-17 12:01:00
+59,trindade,Certificate,revoked,,2028-05-17 19:26:55
+60,domingues,Certificate,revoked,,2028-05-17 19:27:22
+61,teste,Certificate,revoked,,2028-05-17 21:52:58
+62,teste2,Certificate,revoked,,2028-05-17 21:55:34
+63,osvaldo-phone,Certificate,active,,2028-05-26 22:02:18
+64,eqwq,Certificate,revoked,,2028-06-27 23:49:39
+65,Teste,Certificate,revoked,,2028-06-28 00:56:03
+66,alex-teste,Certificate,revoked,,2028-06-28 01:02:01
+67,hfgdhgfhfgh,Certificate,revoked,,2028-06-28 01:09:18
+68,teste21,Certificate,revoked,,2028-06-29 00:42:16
+69,Testando2,Certificate,revoked,,2028-06-29 01:23:20
+70,alex-teste,Certificate,revoked,,2028-07-09 22:13:25
+71,osvaldo-note,Certificate,active,,2028-07-09 23:12:23
+72,teste,Certificate,revoked,,2028-07-10 00:41:04
+73,test12,Certificate,revoked,,2028-07-10 05:03:08
+74,testando123,Certificate,revoked,,2028-07-10 05:27:04
+75,alex-test,Certificate,revoked,,2028-07-10 05:28:01
+76,alex-est,Certificate,revoked,,2028-07-10 05:28:10
+77,asasas,Certificate,revoked,,2028-07-10 05:40:01
+78,asas,Certificate,revoked,,2028-07-10 05:42:08
+79,aluno1,Certificate,revoked,,2028-07-10 06:01:50
+80,aluno2,Certificate,revoked,,2028-07-10 06:01:54
+81,aluno3,Certificate,revoked,,2028-07-10 06:01:59
+82,test1,Certificate,revoked,,2028-07-10 06:57:10
+83,test2,Certificate,revoked,,2028-07-10 06:57:46
+84,test45,Certificate,revoked,,2028-07-10 20:51:26
+85,test45,Certificate,revoked,,2028-07-10 20:55:24
+86,abc,Certificate,revoked,,2028-07-10 20:57:41
+87,abc,Certificate,active,,2028-07-10 21:03:42
+88,def,Certificate,active,,2028-07-10 21:03:57
+89,teste1,Certificate,revoked,,2028-07-10 21:27:20
+90,teste2,Certificate,revoked,,2028-07-10 21:27:52
+91,teste1,Certificate,revoked,,2028-07-10 21:52:50
+92,teste2,Certificate,active,,2028-07-10 21:54:43
+93,teste3,Certificate,revoked,,2028-07-10 21:54:57
+94,1,Certificate,revoked,,2028-07-10 22:14:51
+95,2,Certificate,active,,2028-07-10 22:14:54
+96,3,Certificate,active,,2028-07-10 22:14:56
+97,server,Certificate,active,,
+98,alex-wg4,WireGuard,active,,
+99,assss,WireGuard,active,,
+100,alex-wg2,WireGuard,active,,
+101,aedd,WireGuard,active,,
+102,test3,WireGuard,active,,
+103,ghi,WireGuard,active,,
+104,alex-wg3,WireGuard,active,,
+105,alex-wg1,WireGuard,active,,
+106,alex-wg5,WireGuard,active,,

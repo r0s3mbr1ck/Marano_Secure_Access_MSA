@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="kpi">
+  {% for item in kpis %}
+  <div class="box">
+    <div class="muted">{{ item.label }}</div>
+    <div class="n">{{ item.value }}</div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="card table-card">
+  <h2>
+    <span class="card-icon icon-user" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+        <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+        <circle cx="9" cy="7" r="4"/>
+        <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    </span>
+    Issued Clients
+  </h2>
+
+  <!-- DESKTOP -->
+  <div class="desktop-only">
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Client</th>
+            <th>Type</th>
+            <th>CRT</th>
+            <th>KEY</th>
+            <th>OVPN</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for row in client_rows %}
+          <tr class="connected-row {% if row.online %}is-online{% endif %}">
+
+            <td>
+              <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                <span>{{ row.name }}</span>
+                {% if row.online %}
+                <span class="status-online">ONLINE</span>
+                {% endif %}
+              </div>
+            </td>
+
+            <td><span class="badge {{ row.crt }}">CRT</span></td>
+            <td><span class="badge {{ row.key }}">KEY</span></td>
+            <td><span class="badge {{ row.ovpn }}">OVPN</span></td>
+
+            <td>
+              <div class="actions">
+
+                <!-- REVOKE -->
+                <form method="post" action="{{ url_for('revoke_cn_route') }}" onsubmit="return handleRevokeConfirm(this, '{{ row.name }}');">
+                  <input type="hidden" name="name" value="{{ row.name }}">
+                  <input type="hidden" name="restart_now" value="no">
+                  <button type="submit" class="btn-danger">Revoke</button>
+                </form>
+
+                <!-- GENERATE -->
+                <form method="post" action="{{ url_for('generate_ovpn_route') }}">
+                  <input type="hidden" name="name" value="{{ row.name }}">
+                  <button type="submit" class="btn">Generate</button>
+                </form>
+
+                <!-- DOWNLOAD -->
+                <a class="btn" href="{{ url_for('download_ovpn', name=row.name) }}">Download</a>
+
+                {% if row.access_type == "Certificate + Credentials" %}
+
+                  {% if row.email %}
+                  <form method="post" action="{{ url_for('reset_password_resend_email_route') }}" onsubmit="return confirm('Reset temporary password and resend by email for {{ row.name }}?');">
+                    <input type="hidden" name="name" value="{{ row.name }}">
+                    <input type="hidden" name="email" value="{{ row.email }}">
+                    <button type="submit" class="btn-reset">Reset + Email</button>
+                  </form>
+                  {% endif %}
+
+                  <form method="post" action="{{ url_for('reset_password_resend_telegram_route') }}" onsubmit="return confirm('Reset temporary password and resend by Telegram for {{ row.name }}?');">
+                    <input type="hidden" name="name" value="{{ row.name }}">
+                    <button type="submit" class="btn-reset">Reset + Telegram</button>
+                  </form>
+
+                {% else %}
+
+                  <form method="post" action="{{ url_for('send_telegram_route') }}">
+                    <input type="hidden" name="name" value="{{ row.name }}">
+                    <button type="submit" class="btn">Telegram</button>
+                  </form>
+
+                  {% if row.email %}
+                  <form method="post" action="{{ url_for('send_email_route') }}">
+                    <input type="hidden" name="name" value="{{ row.name }}">
+                    <input type="hidden" name="email" value="{{ row.email }}">
+                    <button type="submit" class="btn">Email</button>
+                  </form>
+                  {% endif %}
+
+                {% endif %}
+
+              </div>
+            </td>
+
+          </tr>
+
+          {% else %}
+          <tr>
+            <td colspan="5">No issued clients found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+
+      </table>
+    </div>
+  </div>
+
+  <!-- MOBILE -->
+  <div class="mobile-only mobile-cards">
+
+    {% for row in client_rows %}
+    <div class="mobile-card">
+
+      <div class="mobile-card-title">
+        <span>{{ row.name }}</span>
+        {% if row.online %}
+        <span class="status-online">ONLINE</span>
+        {% endif %}
+      </div>
+
+      <div class="mobile-card-badges">
+        <span class="badge {{ row.crt }}">CRT</span>
+        <span class="badge {{ row.key }}">KEY</span>
+        <span class="badge {{ row.ovpn }}">OVPN</span>
+      </div>
+
+      <div class="mobile-card-actions">
+
+        <!-- REVOKE -->
+        <form method="post" action="{{ url_for('revoke_cn_route') }}" onsubmit="return handleRevokeConfirm(this, '{{ row.name }}');">
+          <input type="hidden" name="name" value="{{ row.name }}">
+          <input type="hidden" name="restart_now" value="no">
+          <button type="submit" class="btn-danger">Revoke</button>
+        </form>
+
+        <!-- GENERATE -->
+        <form method="post" action="{{ url_for('generate_ovpn_route') }}">
+          <input type="hidden" name="name" value="{{ row.name }}">
+          <button type="submit" class="btn">Generate</button>
+        </form>
+
+        <!-- DOWNLOAD -->
+        <a class="btn" href="{{ url_for('download_ovpn', name=row.name) }}">Download</a>
+
+        {% if row.access_type == "Certificate + Credentials" %}
+
+          {% if row.email %}
+          <form method="post" action="{{ url_for('reset_password_resend_email_route') }}" onsubmit="return confirm('Reset temporary password and resend by email for {{ row.name }}?');">
+            <input type="hidden" name="name" value="{{ row.name }}">
+            <input type="hidden" name="email" value="{{ row.email }}">
+            <button type="submit" class="btn-reset">Reset + Email</button>
+          </form>
+          {% endif %}
+
+          <form method="post" action="{{ url_for('reset_password_resend_telegram_route') }}" onsubmit="return confirm('Reset temporary password and resend by Telegram for {{ row.name }}?');">
+            <input type="hidden" name="name" value="{{ row.name }}">
+            <button type="submit" class="btn-reset">Reset + Telegram</button>
+          </form>
+
+        {% else %}
+
+          <form method="post" action="{{ url_for('send_telegram_route') }}">
+            <input type="hidden" name="name" value="{{ row.name }}">
+            <button type="submit" class="btn">Telegram</button>
+          </form>
+
+          {% if row.email %}
+          <form method="post" action="{{ url_for('send_email_route') }}">
+            <input type="hidden" name="name" value="{{ row.name }}">
+            <input type="hidden" name="email" value="{{ row.email }}">
+            <button type="submit" class="btn">Email</button>
+          </form>
+          {% endif %}
+
+        {% endif %}
+
+      </div>
+    </div>
+
+    {% else %}
+    <div class="muted">No issued clients</div>
+    {% endfor %}
+
+  </div>
+
+</div>
+
+{% endblock %}
