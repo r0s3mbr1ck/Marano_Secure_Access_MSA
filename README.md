@@ -55,8 +55,17 @@ It goes beyond a simple VPN installer by providing:
 ### 🔐 MFA Login
 <img src="docs/images/2fa.gif" width="900"/>
 
+### 🌐 Modern UI Webpage
+<img src="docs/images/modern_ui.gif" width="900"/>
+
 ### 👤 Client Creation
 <img src="docs/images/create_profile_vpn.gif" width="900"/>
+
+### ✅ Create by group
+<img src="docs/images/create_group.gif" width="900"/>
+
+### 📨 Export Telegram or email
+<img src="docs/images/send.gif" width="900"/>
 
 ### 🔁 Revoke / Remove Peer
 <img src="docs/images/revoke.gif" width="900"/>
