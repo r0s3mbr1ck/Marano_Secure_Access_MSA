@@ -1,4 +1,9 @@
-# <img src="docs/images/msa-favicon.svg" width="30" height="30"> Marano Secure Access (MSA)
+<div align="center">
+  <h1>
+    <img src="docs/images/msa-favicon.svg" width="35" valign="middle">
+    Marano Secure Access (MSA)
+  </h1>
+</div>
 
 <p align="center">
   <img src="docs/images/cover.png" width="900"/>
@@ -137,7 +142,6 @@ MSA_SMTP_USER=CHANGE_ME
 MSA_SMTP_PASS=CHANGE_ME
 MSA_SMTP_FROM=CHANGE_ME
 ```
-
 ---
 
 5. Run
