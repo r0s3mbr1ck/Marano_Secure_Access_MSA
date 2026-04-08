@@ -184,15 +184,15 @@ Internet
    ├── Flask Web Panel
 
 > [!tip]
-> If you don’t have a public static IP, use DDNS.
+> - If you don’t have a public static IP, use DDNS.
 > 
-> If ports 80/443 are blocked: use a high port (e.g. 8443) and remember of redirect ports
+> - If ports 80/443 are blocked: use a high port (e.g. 8443) and remember of redirect ports
 > 
-> generate app password from mail account and one token of telegram bot.
+> - Generate app password from mail account and one token of telegram bot to configure .env
 > 
-> Always validate: curl ifconfig.me
+> - Always validate: curl ifconfig.me
 > 
-> If behind CGNAT: VPN access from outside will not work without workaround (e.g. VPS relay)
+> - If behind CGNAT: VPN access from outside will not work without workaround (e.g. VPS relay)
 
 ---
 
@@ -254,10 +254,8 @@ Features:
 ├── requirements.txt
 ├── templates/
 ├── static/
-├── scripts/
 ├── docs/
 │   ├── images/
-│   └── gifs/
 ├── examples/
 
 
