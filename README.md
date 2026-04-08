@@ -153,20 +153,7 @@ This ensures:
 
 ## 🔁 Self-Service Access Recovery
 
-Users without credentials (e.g. certificate-only or WireGuard) can request access via:
-
-👉 **User Portal → Request Access**
-
-Flow:
-
-1. User enters username
-2. System validates eligibility
-3. A **secure token link** is sent via email
-4. User accesses the portal without password
-5. Token is:
-   - time-limited
-   - single-use
-   - automatically invalidated after login
+Users without credentials (e.g. certificate-only or WireGuard) can request access via temporary and single-use token:
 
 ---
 
@@ -210,19 +197,6 @@ This ensures:
 
 ---
 
-## 🌐 User Portal
-
-The User Portal provides:
-
-- Profile download
-- Password change (for auth users)
-- Access instructions per VPN type
-- Secure access via token (email-based)
-
-👉 Accessible even without VPN (recommended deployment)
-
----
-
 ## 🔐 Authentication Modes
 
 MSA supports:
@@ -249,7 +223,7 @@ MSA includes a registry engine that tracks:
 
 ---
 
-## 🌐 Web Panel
+## 🌐 Web Panel Admin
 
 Features:
 - Dashboard
@@ -262,6 +236,18 @@ Features:
 - Registry management
 
 ---
+
+## 🌐 User Portal
+
+Features:
+- Profile download
+- Password change (for auth users)
+- Access instructions per VPN type
+- Secure access via token (email-based)
+
+---
+
+👉 Accessible even without VPN (recommended deployment)
 
 ## 🔐 Infrastructure & PKI Notes
 
