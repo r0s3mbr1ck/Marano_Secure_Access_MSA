@@ -265,7 +265,7 @@ The following components are **NOT included by default** and must be configured 
 ### 🔒 Security Recommendations
 - Restrict access to the web panel (VPN-only or firewall rules)
 - Use HTTPS in production
-- Enable MFA for administrative access (planned feature)
+- Enable MFA for administrative access
 - Use one VPN profile per device
 - Revoke compromised credentials immediately
 
