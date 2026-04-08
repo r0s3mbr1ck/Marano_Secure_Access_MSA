@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bg" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0%" stop-color="#0f172a"/>
+      <stop offset="100%" stop-color="#1e3a8a"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" x2="1">
+      <stop offset="0%" stop-color="#38bdf8"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Fundo -->
+  <rect width="64" height="64" rx="16" fill="url(#bg)"/>
+
+  <!-- Escudo -->
+  <path d="M32 10 L50 18 V30C50 42 41 50 32 54C23 50 14 42 14 30V18Z"
+        fill="none"
+        stroke="url(#accent)"
+        stroke-width="2.5"/>
+
+  <!-- Letra M -->
+  <path d="M22 40V24L32 34L42 24V40"
+        fill="none"
+        stroke="white"
+        stroke-width="3"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+</svg>
