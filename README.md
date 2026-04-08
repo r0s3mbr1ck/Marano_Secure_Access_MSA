@@ -1,267 +1,113 @@
-# 🛡️ OpenVPN Self-Hosted Platform with Proxmox + LXC + CLI + Web Panel + Telegram Integration
+# 🛡️ Marano Secure Access (MSA)
 
 <p align="center">
   <img src="docs/images/cover.png" width="900"/>
 </p>
 
 <p align="center">
-  <b>Fully self-hosted OpenVPN platform with Web UI, CLI automation and no user limits</b>
+  <b>Self-hosted secure access platform with OpenVPN, WireGuard, MFA and full lifecycle control</b>
 </p>
 
 ---
 
-## 🚀 Badges
+## ⚡ Highlights
 
-<p align="center">
-
-![OpenVPN](https://img.shields.io/badge/OpenVPN-Community-orange)
-![Platform](https://img.shields.io/badge/Platform-Proxmox-blue)
-![Language](https://img.shields.io/badge/Python-Flask-green)
-![License](https://img.shields.io/badge/License-MIT-lightgrey)
-![Status](https://img.shields.io/badge/Status-Active-success)
-
-</p>
+- 🔐 MFA (2FA) for administrative access  
+- 🌐 OpenVPN + WireGuard support  
+- 🧠 Registry-based lifecycle management  
+- 📦 Profile delivery (Download / Email / Telegram)  
+- ⚙️ CLI + Web automation  
+- 🚫 No user limits  
+- 🧩 Full PKI ownership  
 
 ---
 
-# 📌 Overview
+## 🧠 What is MSA?
 
-This project delivers a **fully self-hosted OpenVPN platform** designed for:
+**Marano Secure Access (MSA)** is a **self-hosted secure access platform** designed to manage VPN access with full control over identity, lifecycle and distribution.
 
-* homelabs
-* cyber training environments
-* internal infrastructure
-* controlled enterprise scenarios
+It is not just a VPN installer.
 
-It combines:
+It provides:
 
-* OpenVPN Community Edition
-* Easy-RSA PKI
-* CLI automation (full lifecycle management)
-* Web dashboard (Flask-based UI)
-* Telegram integration for `.ovpn` delivery
+- identity-aware access
+- certificate lifecycle management
+- hybrid authentication (certificate + credentials)
+- centralized registry tracking
+- operational visibility
+- automation-ready workflows
 
-👉 **No artificial connection limits. No vendor lock-in. Full control.**
-
+👉 Built for real-world environments (labs, cyber training, internal infrastructure).
 
 ---
 
-# 🎯 Why this project exists
+## 🎬 Features
 
-Most self-hosted VPN solutions:
+> Replace with your GIFs later
 
-* limit concurrent users
-* hide internal PKI
-* restrict automation
+### 🔐 MFA Login
+`docs/gifs/mfa.gif`
 
-This project solves that by providing:
+### 👤 Client Creation
+`docs/gifs/create-client.gif`
 
-* full PKI ownership
-* certificate lifecycle control
-* unlimited simultaneous connections
-* operational simplicity (CLI + Web)
-* automation-ready design
+### 🔁 Revoke / Remove Peer
+`docs/gifs/revoke.gif`
 
-👉 **Built for real-world operators, not just lab demos.**
+### 📡 WireGuard Profiles
+`docs/gifs/wireguard.gif`
 
----
-
-> ⚠️ **IMPORTANT**
-> The script may have execution errors, translation issues, and opportunities for visual improvements. Contributions are welcome!
-
-# 🧭 Deployment Flow
-
-```text
-1. Install OpenVPN
-2. Configure PKI (Easy-RSA)
-3. Start VPN server
-4. (Optional) Use CLI automation
-5. Deploy Web Panel
-6. (Optional) Add Nginx reverse proxy
-```
+### 📊 Dashboard
+`docs/gifs/dashboard.gif`
 
 ---
 
-# 🌐 Real-world scenario (Important)
+## 🧱 Architecture
 
-This project was implemented in a **home/lab environment**:
+MSA is composed of:
 
-* No public static IP
-* DDNS used
-* Router performing NAT + port forwarding
+### 🔹 Access Layer
+- OpenVPN
+- WireGuard
 
-```text
-Internet
-   |
-[ ISP Router ]
-  - DDNS → yourdomain.ddns.net
-  - UDP 1194 → forwarded
-   |
-[ Proxmox Host ]
-   |
-[ OpenVPN LXC Container ]
-  - eth0 → LAN
-  - tun0 → VPN
-```
+### 🔹 Identity Layer
+- Easy-RSA PKI
+- Credential-based authentication (optional)
+- MFA (TOTP)
 
-⚠️ Adapt for:
+### 🔹 Management Layer
+- Flask Web Dashboard
+- CLI automation
+- Registry engine
 
-* cloud environments
-* static IP setups
-* enterprise firewalls
+### 🔹 Delivery Layer
+- Download
+- Email
+- Telegram
 
 ---
 
-# 📸 Screenshots
+## 📦 Installation
 
-### CLI
-
-![CLI](docs/images/cli.png)
-
-### Dashboard
-
-![Dashboard](docs/images/dashboard_webpage.png)
-
-### Connected Clients
-
-![Connected](docs/images/connected_clients.png)
-
-### Sidebar
-
-![Sidebar](docs/images/dashboard_webpage_sidebar.png)
-
-### Logs
-
-![Logs](docs/images/logs.png)
-
----
-
-# 🧪 Tested Environment
-
-* Proxmox VE
-* Ubuntu 22 LXC
-* OpenVPN Community
-* Easy-RSA
-* Python 3 + Flask
-* Nginx
-* iptables
-
----
-
-> [!note]
-> 🔐 Certificate-based authentication is fully functional.  
-> 🚧 Hybrid authentication (certificate + username/password) is under active development.
-
----
-
-# 📦 Base Installation (OpenVPN)
-
-## Install packages
+### 1. Install dependencies
 
 ```bash
 apt update
-apt install -y openvpn easy-rsa iptables-persistent python3 python3-pip nginx curl
+apt install -y openvpn easy-rsa wireguard iptables-persistent python3 python3-pip nginx
 ```
 
 ---
 
-# 🔐 PKI Setup (Easy-RSA)
+2. Clone project
 
 ```bash
-make-cadir /etc/openvpn/easy-rsa
-cd /etc/openvpn/easy-rsa
-
-./easyrsa init-pki
-./easyrsa build-ca nopass
-
-./easyrsa gen-req server nopass
-./easyrsa sign-req server server
-./easyrsa gen-dh
-
-openvpn --genkey tls-crypt /etc/openvpn/tc.key
-
-./easyrsa gen-crl
-cp pki/crl.pem /etc/openvpn/
-chmod 644 /etc/openvpn/crl.pem
+git clone https://github.com/YOUR_USER/msa.git
+cd msa
 ```
 
 ---
 
-# ⚙️ OpenVPN Server
-
-```text
-/etc/openvpn/server.conf
-```
-
----
-
-# 🔁 NAT & Forwarding
-
-```bash
-sysctl -w net.ipv4.ip_forward=1
-
-iptables -t nat -A POSTROUTING -s 10.8.0.0/24 -o eth0 -j MASQUERADE
-netfilter-persistent save
-```
-
----
-
-# ▶️ Start Service
-
-```bash
-systemctl enable openvpn@server
-systemctl start openvpn@server
-```
-
----
-
-# 💻 CLI Management
-
-Script:
-
-```text
-scripts/ovpn-menu.sh
-```
-
-## Capabilities
-
-* client creation
-* `.ovpn` generation
-* revoke (CN / ID / range)
-* TTL-based registry
-* Telegram export
-* logs + health checks
-
----
-
-# 🌐 Web Panel
-
-## Features
-
-* Dashboard
-* Connected clients
-* Client management
-* Revocation
-* Logs
-* Health check
-* Telegram integration
-* Sidebar UI
-
----
-
-# ⚡ Quick Start (Web Panel)
-
-## Clone repository
-
-```bash
-git clone https://github.com/r0s3mbr1ck/OVPN_Self_Hosted.git
-cd OVPN_Self_Hosted
-```
-
----
-
-## Setup environment
-
+3. Setup environment
 ```bash
 python3 -m venv venv
 source venv/bin/activate
@@ -270,127 +116,252 @@ pip install -r requirements.txt
 
 ---
 
-## Configure variables
-
+4. Configure environment
 ```bash
-nano /root/.config/ovpn-menu.env
+nano /root/.config/msa.env
 ```
+Example:
+```conf
+MSA_WEB_SECRET=CHANGE_ME
 
-```bash
-export OVPN_WEB_SECRET='CHANGE_ME'
-export OVPN_TG_BOT_TOKEN='CHANGE_ME'
-export OVPN_TG_CHAT_ID='CHANGE_ME'
+MSA_ADMIN_USER=admin
+MSA_ADMIN_PASS=CHANGE_ME
+MSA_ADMIN_TOTP_SECRET=CHANGE_ME
+
+MSA_TG_BOT_TOKEN=CHANGE_ME
+MSA_TG_CHAT_ID=CHANGE_ME
+
+MSA_SMTP_HOST=smtp.example.com
+MSA_SMTP_PORT=465
+MSA_SMTP_USER=CHANGE_ME
+MSA_SMTP_PASS=CHANGE_ME
+MSA_SMTP_FROM=CHANGE_ME
 ```
 
 ---
 
-## Run
-
+5. Run
 ```bash
 python3 app.py
 ```
 
 Access:
 
-```text
 http://127.0.0.1:8080
-```
+
 
 ---
 
-# 🌍 Nginx Reverse Proxy
+🌍 Deployment (Example)
 
-```nginx
-server {
-    listen 80;
-    server_name vpn.yourdomain.local;
+Typical home/lab setup:
 
-    location / {
-        proxy_pass http://127.0.0.1:8080;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-```
+Internet
+   |
+[ Router + DDNS ]
+   |
+[ Proxmox Host ]
+   |
+[ MSA Container ]
+   ├── OpenVPN
+   ├── WireGuard
+   ├── Web Panel
 
----
-
-## Redirect IP → Domain
-
-```nginx
-server {
-    listen 80;
-    server_name 192.168.XX.XX;
-    return 301 http://vpn.yourdomain.local$request_uri;
-}
-```
 
 ---
 
-# 📁 Project Structure
+🔐 Authentication Modes
 
-```text
+MSA supports:
+
+Certificate only (OpenVPN)
+
+Certificate + Credentials
+
+WireGuard peer-based access
+
+MFA for admin login
+
+
+
+---
+
+🗂️ Registry System
+
+MSA includes a registry engine that tracks:
+
+active clients
+
+revoked clients
+
+profile types
+
+lifecycle state
+
+
+Supported operations:
+
+auto-registration on creation
+
+revoke tracking
+
+rebuild from system state
+
+export
+
+
+
+---
+
+🌐 Web Panel
+
+Features:
+
+Dashboard
+
+Issued clients
+
+Connected clients
+
+Profile creation
+
+Revoke / Remove peer
+
+Logs
+
+Server health
+
+Registry management
+
+
+
+---
+
+💻 CLI
+
+Script:
+
+scripts/ovpn-menu.sh
+
+Capabilities:
+
+create clients
+
+generate profiles
+
+revoke by CN / ID / range
+
+automation
+
+logs / health
+
+
+
+---
+
+🔐 Security Notes
+
+Use HTTPS in production
+
+Protect admin credentials
+
+Enable MFA
+
+Use one profile per device
+
+Revoke compromised clients immediately
+
+Do not expose private keys
+
+
+
+---
+
+📁 Project Structure
+
 .
-├── README.md
 ├── app.py
 ├── requirements.txt
 ├── templates/
 ├── static/
 ├── scripts/
-│   └── ovpn-menu.sh
-├── docs/images/
+├── docs/
+│   ├── images/
+│   └── gifs/
 ├── examples/
-└── venv/
-```
+
 
 ---
 
-# 📁 Example Files
+🚀 Roadmap
 
-```text
-examples/
-├── server.conf.example
-├── base.conf.example
-├── ovpn-web-service.service.example
-├── ovpn-menu.env.example
-```
+Short Term
+
+UI improvements
+
+safer bulk operations
+
+registry enhancements
+
+health dashboard improvements
+
+
+Mid Term
+
+audit logs
+
+RBAC (roles)
+
+better filtering/search
+
+backup/restore
+
+
+Future
+
+API REST
+
+multi-admin support
+
+zero-trust model
+
+enterprise integration
+
+
 
 ---
 
-# 🔐 Security Notes
+🤝 Contributing
 
-* Use HTTPS if exposed externally
-* Restrict access to the panel
-* One certificate per device
-* Revoke compromised devices immediately
-* Never publish `.ovpn` files or private keys
+Contributions are welcome.
 
----
+Focus areas:
 
-# 🧠 Final Notes
+security
 
-This project provides:
+UI/UX
 
-* a complete self-hosted VPN stack
-* automation + UI
-* scalability without licensing limits
+automation
 
-👉 Ideal for labs, training environments, and internal infrastructure.
+documentation
+
+
 
 ---
 
-# 🚀 Next Step
+📌 Final Notes
 
-👉 Full Web Panel automation (Auth profile creation)
+MSA provides:
 
-👉 Password lifecycle enforcement (mandatory change on first login)
+full control
 
-👉 Hybrid authentication hardening (certificate + password)
+self-hosted architecture
 
-👉 Automated profile distribution (Telegram / Email / QR Code)
+OpenVPN + WireGuard
 
-👉 Web UI improvements (UX, validation, password tools)
+MFA protection
 
-👉 Security hardening (HTTPS, access control, auditing)
+lifecycle management
 
-👉 Docker version (1-command deployment)
+
+👉 Ideal for labs, cyber environments and controlled access infrastructures.
