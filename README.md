@@ -46,16 +46,14 @@ It goes beyond a simple VPN installer by providing:
 
 ## 🎬 Features
 
-> Replace with your GIFs later
-
 ### 🔐 MFA Login
-`docs/images/2fa.gif`
+<img src="docs/images/2fa.gif" width="900"/>
 
 ### 👤 Client Creation
-`docs/iamges/create_profile_vpn.gif`
+<img src="docs/images/create_profile_vpn.gif" width="900"/>
 
 ### 🔁 Revoke / Remove Peer
-`docs/images/revoke.gif`
+<img src="docs/images/revoke.gif" width="900"/>
 
 ---
 
