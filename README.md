@@ -67,7 +67,7 @@ It goes beyond a simple VPN installer by providing:
 ### ✅ Bulk VPN profile creation 
 <img src="docs/images/create_group.gif" width="900"/>
 
-### 📨 Export Telegram or email
+### 📨 Export to Telegram or email
 <img src="docs/images/send.gif" width="900"/>
 
 ### 🔁 Revoke / Remove Peer
