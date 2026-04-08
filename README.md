@@ -13,7 +13,11 @@
   <b>Self-hosted secure access platform with OpenVPN, WireGuard, MFA and full lifecycle control</b>
 </p>
 
----
+<div align="center">
+  <h1>
+   👊 No vendors. No limits. You in control!
+  </h1>
+</div>
 
 ## ⚡ Highlights
 
@@ -40,7 +44,9 @@ It goes beyond a simple VPN installer by providing:
 - operational visibility  
 - automation-ready workflows  
 
-👉 Built for real-world environments such as homelabs, cyber training platforms, and internal infrastructure.
+### 👉 Built for real-world environments such as homelabs, cyber training platforms, and internal infrastructure.
+
+
 
 ---
 
