@@ -182,10 +182,9 @@ Internet
 
 MSA supports:
 - Certificate only (OpenVPN)
-- Certificate + Credentials
+- Certificate + Credentials + Send temporary password + Reset (Resend)
 - WireGuard peer-based access
 - MFA for admin login
-
 
 
 ---
@@ -212,8 +211,8 @@ Features:
 - Dashboard
 - Issued clients
 - Connected clients
-- Profile creation
-- Revoke / Remove peer
+- Profile creation individual or groups
+- Revoke / Remove peer individual or groups
 - Logs
 - Server health
 - Registry management
