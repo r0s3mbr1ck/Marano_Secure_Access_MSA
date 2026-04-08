@@ -49,19 +49,13 @@ It goes beyond a simple VPN installer by providing:
 > Replace with your GIFs later
 
 ### 🔐 MFA Login
-`docs/gifs/mfa.gif`
+`docs/images/2fa.gif`
 
 ### 👤 Client Creation
-`docs/gifs/create-client.gif`
+`docs/iamges/create_profile_vpn.gif`
 
 ### 🔁 Revoke / Remove Peer
-`docs/gifs/revoke.gif`
-
-### 📡 WireGuard Profiles
-`docs/gifs/wireguard.gif`
-
-### 📊 Dashboard
-`docs/gifs/dashboard.gif`
+`docs/images/revoke.gif`
 
 ---
 
