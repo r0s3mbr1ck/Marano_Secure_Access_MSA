@@ -170,11 +170,23 @@ Typical home/lab setup:
 ```mermaid
 flowchart TD
     Internet["🌐 Internet"]
-    Router["Router / ISP (CPE)\nDDNS + Port Forwarding\nUDP 1194 → OpenVPN\nUDP 51820 → WireGuard\nTCP 80/443 → Web UI"]
+    Router["Router / ISP (CPE)"]
+    Ports["DDNS + Port Forwarding"]
+    OpenVPN["UDP 1194 - OpenVPN"]
+    WireGuard["UDP 51820 - WireGuard"]
+    Web["TCP 80/443 - Web Panel"]
     Proxmox["Proxmox Host"]
-    MSA["MSA (VPN Gateway)\nOpenVPN + WireGuard\nWeb Panel (FastAPI)"]
+    MSA["MSA (VPN Gateway)"]
+    Services["OpenVPN + WireGuard + Web Panel"]
 
-    Internet --> Router --> Proxmox --> MSA
+    Internet --> Router
+    Router --> Ports
+    Ports --> OpenVPN
+    Ports --> WireGuard
+    Ports --> Web
+    Router --> Proxmox
+    Proxmox --> MSA
+    MSA --> Services
 ```
 
 > [!tip]
