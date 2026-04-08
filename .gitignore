@@ -1,0 +1,6 @@
+.env
+.ovpn
+pki/
+*.key
+*.crt
+data/
