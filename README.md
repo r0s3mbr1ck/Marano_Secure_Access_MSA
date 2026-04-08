@@ -61,7 +61,7 @@ It goes beyond a simple VPN installer by providing:
 ### 👤 Client Creation
 <img src="docs/images/create_profile_vpn.gif" width="900"/>
 
-### ✅ Create by group
+### ✅ Bulk VPN profile creation 
 <img src="docs/images/create_group.gif" width="900"/>
 
 ### 📨 Export Telegram or email
