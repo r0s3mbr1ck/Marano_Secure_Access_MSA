@@ -2167,8 +2167,7 @@ def require_paths():
         raise RuntimeError(f"easyrsa not found at: {EASYRSA_DIR / 'easyrsa'}")
     OVPN_OUT_DIR.mkdir(parents=True, exist_ok=True)
     if not REGISTRY.exists():
-        REGISTRY.write_text("id,cn,created_at,expires_at,status\n", encoding="utf-8")
-
+        REGISTRY.write_text("id,cn,type,email,status,created_at,revoked_at\n", encoding="utf-8")
 
 def client_crt(name: str) -> Path:
     return EASYRSA_DIR / "pki" / "issued" / f"{name}.crt"
@@ -2228,16 +2227,6 @@ def server_health():
         blocks.append("$ server.conf\n" + ("\n".join(relevant) if relevant else "No relevant lines found."))
     return "\n\n".join(blocks)
 
-
-def read_registry_rows():
-    require_paths()
-    rows = []
-    with REGISTRY.open(newline="", encoding="utf-8") as fh:
-        for row in csv.DictReader(fh):
-            rows.append(row)
-    return rows
-
-
 def append_registry(id_value: int, cn: str, ttl_hours: int):
     with REGISTRY.open("a", newline="", encoding="utf-8") as fh:
         writer = csv.writer(fh)
@@ -2271,7 +2260,7 @@ def mark_revoked_id_last_active(id_value: int):
     if not changed:
         return False
     with REGISTRY.open("w", newline="", encoding="utf-8") as fh:
-        writer = csv.DictWriter(fh, fieldnames=["id", "cn", "created_at", "expires_at", "status"])
+        writer = csv.DictWriter(fh, fieldnames=REGISTRY_FIELDS)
         writer.writeheader()
         writer.writerows(rows)
     return True
