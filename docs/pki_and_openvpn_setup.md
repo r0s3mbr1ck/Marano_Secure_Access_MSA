@@ -23,7 +23,7 @@ This document describes the **manual infrastructure setup required** to run the 
 pct stop 1XX
 pct set 1XX -mp0 /dev/net/tun,mp=/dev/net/tun
 pct start 1XX
-``
+```
 
 ---
 
@@ -68,7 +68,7 @@ set_var EASYRSA_CERT_EXPIRE 825
 ---
 
 4. Generate server certificate and key
-``````bash
+```bash
 ./easyrsa gen-req server nopass
 ./easyrsa sign-req server server
 ./easyrsa gen-dh
@@ -137,7 +137,7 @@ status-version 2
 
 crl-verify /etc/openvpn/crl.pem
 
-push "dhcp-option DNS 192.168.15.92"
+push "dhcp-option DNS 192.168.XX.XX"
 push "dhcp-option DOMAIN home"
 
 push "route 192.168.XX.0 255.255.255.0"
