@@ -398,7 +398,7 @@ Before using the application, you must configure:
 - Certificate Authority (PKI)
 - Networking (TUN, NAT, routing)
 
-👉 See full setup guide:
+👉 See setup guide for this:
 
 📄 [`docs/pki_and_openvpn_setup.md`](docs/pki_and_openvpn_setup.md)
 
