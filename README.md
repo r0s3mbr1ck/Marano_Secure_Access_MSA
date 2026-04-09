@@ -59,7 +59,9 @@ It goes beyond a simple VPN installer by providing:
 <img src="docs/images/modern_ui.gif" width="900"/>
 
 ## 📲 Mobile-friendly
-<img src="docs/images/mobile.gif" width="450"/>
+<p align="center">
+  <img src="docs/images/mobile.gif" width="250"/>
+</p>
 
 ### 👤 Profile VPN creation
 <img src="docs/images/create_profile_vpn.gif" width="900"/>
@@ -76,8 +78,6 @@ It goes beyond a simple VPN installer by providing:
 ---
 
 ## 🧱 Architecture
-
-MSA is structured in four layers:
 
 MSA is composed of four main layers:
 
@@ -151,13 +151,13 @@ This ensures:
 
 ---
 
-## 🔁 Self-Service Access Recovery
+### 🔁 Self-Service Access Recovery
 
-Users without credentials (e.g. certificate-only or WireGuard) can request access via temporary and single-use token:
+Users without credentials (e.g. certificate-only or WireGuard) can request access via temporary and single-use token
 
 ---
 
-## 🚫 Security Design Decisions
+### 🚫 Security Design Decisions
 
 - No email → ❌ no user creation
 - No duplicate emails → ❌ blocked at DB level
@@ -178,7 +178,7 @@ Strong separation between admin and user flows
 
 ---
 
-## 📬 Profile Delivery Strategy
+### 📬 Profile Delivery Strategy
 
 MSA enforces **email as a required delivery channel**.
 
@@ -197,7 +197,7 @@ This ensures:
 
 ---
 
-## 🔐 Authentication Modes
+### 🔐 Authentication Modes
 
 MSA supports:
 - Certificate only (OpenVPN)
@@ -207,7 +207,7 @@ MSA supports:
 
 ---
 
-## 🗂️ Registry System
+### 🗂️ Registry System
 MSA includes a registry engine that tracks:
 - active clients
 - revoked clients
@@ -215,7 +215,7 @@ MSA includes a registry engine that tracks:
 - lifecycle state
 
 
-## Supported operations:
+### Supported operations:
 - auto-registration on creation
 - revoke tracking
 - rebuild from system state
@@ -223,7 +223,8 @@ MSA includes a registry engine that tracks:
 
 ---
 
-## 🌐 Web Panel Admin
+## 🌐 Web Panel
+### Admin
 
 Features:
 - Dashboard
@@ -237,7 +238,7 @@ Features:
 
 ---
 
-## 🌐 User Portal
+### User Portal
 
 Features:
 - Profile download
