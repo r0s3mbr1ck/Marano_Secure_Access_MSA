@@ -210,6 +210,8 @@ Marano_Secure_Access_MSA/
 
 ## ⚠️ Notes
 🚩 Designed for self-hosted environments
+
 🚩 Requires networking and PKI knowledge
+
 🚩 Do not expose private keys or sensitive data
 
