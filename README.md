@@ -282,6 +282,18 @@ The following components are **NOT included by default** and must be configured 
   - UDP 51820 → WireGuard
 - If using DDNS, ensure it is properly configured
 
+This project does **not include automatic setup** of VPN infrastructure or PKI.
+
+Before using the application, you must configure:
+
+- OpenVPN server
+- Certificate Authority (PKI)
+- Networking (TUN, NAT, routing)
+
+👉 See setup guide for this:
+
+📄 [`docs/pki_and_openvpn_setup.md`](docs/pki_and_openvpn_setup.md)
+
 ---
 
 > ⚠️ This project is designed to be **self-hosted** and assumes basic knowledge of networking, PKI, and server management.
@@ -387,20 +399,6 @@ python3 app.py
 Access:
 
 http://127.0.0.1:8080
-
-### 2. Additional Configuration Required
-
-This project does **not include automatic setup** of VPN infrastructure or PKI.
-
-Before using the application, you must configure:
-
-- OpenVPN server
-- Certificate Authority (PKI)
-- Networking (TUN, NAT, routing)
-
-👉 See setup guide for this:
-
-📄 [`docs/pki_and_openvpn_setup.md`](docs/pki_and_openvpn_setup.md)
 
 ---
 
