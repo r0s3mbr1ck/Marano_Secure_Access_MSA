@@ -32,9 +32,18 @@
 
 ## 🧠 What is MSA?
 
-**Marano Secure Access (MSA)** is a self-hosted platform designed to manage VPN access with full control over identity, lifecycle, and distribution.
+**Marano Secure Access (MSA)** is a self-hosted platform for **identity-driven VPN access management**.
 
-Built for homelabs, cyber training environments and internal infrastructure.
+It combines:
+
+- VPN provisioning (OpenVPN / WireGuard)
+- User identity (email-based)
+- Access lifecycle control
+- Secure profile delivery
+
+MSA transforms VPN access from a manual process into a **controlled, auditable and automated system**.
+
+👉 Built for homelabs, cyber training platforms and internal infrastructure.
 
 ---
 
