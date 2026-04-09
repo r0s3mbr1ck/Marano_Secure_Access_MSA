@@ -388,6 +388,20 @@ Access:
 
 http://127.0.0.1:8080
 
+### 2. Additional Configuration Required
+
+This project does **not include automatic setup** of VPN infrastructure or PKI.
+
+Before using the application, you must configure:
+
+- OpenVPN server
+- Certificate Authority (PKI)
+- Networking (TUN, NAT, routing)
+
+👉 See full setup guide:
+
+📄 [`docs/pki_and_openvpn_setup.md`](docs/pki_and_openvpn_setup.md)
+
 ---
 
 > [!tip]
@@ -403,21 +417,60 @@ http://127.0.0.1:8080
 
 ## 🚀 Roadmap
 
-### Short Term
-- UI improvements
-- safer bulk operations
-- registry enhancements
-- improved health dashboard
+### ✅ Completed (Phase 1 — Core Platform)
+- Web Dashboard (Flask)
+- OpenVPN (Certificate + Auth) integration
+- WireGuard support (full lifecycle)
+- MFA (TOTP) for admin access
+- Registry system (CSV-based lifecycle tracking)
+- Profile delivery via:
+  - Download
+  - Email
+  - Telegram
+- User Portal:
+  - Login (credentials-based)
+  - Token-based access (passwordless via email)
+  - Profile download
+  - Password change (self-service)
+  - Self-service access flow (no admin required for users)
+- Email uniqueness enforcement (1 email = 1 identity)
+- Secure access link (single-use + expiration)
+- Automatic email delivery with onboarding instructions
+- UX improvements in profile creation flows
+- Registry rebuild from system state (OpenVPN + WireGuard)
 
+---
 
-### Mid Term
-- audit logs
-- RBAC (roles)
-- better filtering/search
-- backup/restore
+### ⚙️ In Progress (Phase 2 — Stability & UX)
+- WireGuard QR Code in User Portal
+- Improved onboarding experience (user-first flow)
+- Better dashboard consistency (registry vs generated profiles)
+- Registry data consistency improvements
+- Hardening of authentication flows
 
-### Future
+---
+
+### 🔐 Next Steps (Phase 3 — Security & Reliability)
+- Rate limiting (login + access request endpoints)
+- Audit logging (user actions, admin actions)
+- Session hardening and timeout tuning
+- Abuse protection (anti-enumeration improvements)
+- Safer bulk operations
+  
+---
+
+### 🧠 Mid Term (Phase 4 — Architecture Evolution)
+- Migration from CSV registry → SQLite database
+- Registry reconciliation engine
+- Backup & restore for registry and profiles
+- Advanced filtering and search
+- Improved rebuild logic (preserve metadata like email/type)
+
+---
+
+### 🏢 Advanced Features (Phase 5 — Enterprise Ready)
+- RBAC (multi-admin roles)
 - REST API
-- multi-admin support
-- zero-trust model
-- enterprise integration
+- Multi-tenant support
+- External integrations (SIEM / IAM)
+- Zero Trust model (identity-aware access policies)
