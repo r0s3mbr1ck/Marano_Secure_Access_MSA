@@ -359,25 +359,23 @@ pip install -r requirements.txt
 
 4. Configure environment
 ```bash
-nano /root/.config/msa.env
+nano /root/.config/msa.env && chmod 600 /root/.config/msa.env
 ```
 
 Example:
 ```bash
-MSA_WEB_SECRET=CHANGE_ME
-
-MSA_ADMIN_USER=admin
-MSA_ADMIN_PASS=CHANGE_ME
-MSA_ADMIN_TOTP_SECRET=CHANGE_ME
-
-MSA_TG_BOT_TOKEN=CHANGE_ME
-MSA_TG_CHAT_ID=CHANGE_ME
-
-MSA_SMTP_HOST=smtp.example.com
-MSA_SMTP_PORT=465
-MSA_SMTP_USER=CHANGE_ME
-MSA_SMTP_PASS=CHANGE_ME
-MSA_SMTP_FROM=CHANGE_ME
+export MSA_WEB_SECRET="CHANGE_ME"
+export MSA_ADMIN_USER="admin"
+export MSA_ADMIN_PASS="CHANGE_ME"
+export MSA_ADMIN_TOTP_SECRET="CHANGE_ME"
+export MSA_TG_BOT_TOKEN="CHANGE_ME"
+export MSA_TG_CHAT_ID="CHANGE_ME"
+export MSA_SMTP_HOST="smtp.example.com"
+export MSA_SMTP_PORT="465"
+export MSA_SMTP_USER="CHANGE_ME"
+export MSA_SMTP_PASS="CHANGE_ME"
+export MSA_SMTP_FROM="CHANGE_ME"
+export MSA_SUPPORT_EMAIL="CHANGE_ME"
 ```
 
 ---
