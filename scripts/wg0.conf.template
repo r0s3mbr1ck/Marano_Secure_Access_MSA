@@ -1,0 +1,7 @@
+[Interface]
+Address = __WG_SERVER_ADDRESS__/24
+ListenPort = __WG_SERVER_PORT__
+PrivateKey = __WG_SERVER_PRIVATE_KEY__
+
+PostUp = iptables -t nat -A POSTROUTING -s __WG_NETWORK_CIDR__ -o __WAN_IFACE__ -j MASQUERADE; iptables -A FORWARD -i __WG_IFACE__ -j ACCEPT; iptables -A FORWARD -o __WG_IFACE__ -j ACCEPT
+PostDown = iptables -t nat -D POSTROUTING -s __WG_NETWORK_CIDR__ -o __WAN_IFACE__ -j MASQUERADE; iptables -D FORWARD -i __WG_IFACE__ -j ACCEPT; iptables -D FORWARD -o __WG_IFACE__ -j ACCEPT

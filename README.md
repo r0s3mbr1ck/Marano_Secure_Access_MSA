@@ -13,8 +13,15 @@
   <b>Self-hosted secure access platform with OpenVPN, WireGuard, MFA and full lifecycle control</b>
 </p>
 
+<p align="center">
+  <img src="https://img.shields.io/badge/python-3.11+-blue.svg">
+  <img src="https://img.shields.io/badge/status-active-success.svg">
+  <img src="https://img.shields.io/badge/license-MIT-green.svg">
+  <img src="https://img.shields.io/badge/self--hosted-yes-orange.svg">
+</p>
+
 <div align="center">
-  <h2>👊 No vendors. No limits. You in control!</h2>
+  <h2>👊 No vendors. No limits. <b>Full control.</b></h2>
 </div>
 
 ---
@@ -75,6 +82,18 @@ MSA transforms VPN access from a manual process into a **controlled, auditable a
 
 ---
 
+## 🔐 PKI Requirement
+
+MSA relies on a valid PKI (Public Key Infrastructure) using Easy-RSA.
+
+The automated setup will initialize:
+
+- Certificate Authority (CA)
+- Server certificate
+- Certificate Revocation List (CRL)
+
+---
+
 ## 🌍 Deployment Example
 
 ```mermaid
@@ -99,30 +118,120 @@ flowchart TD
 
 ---
 
-## 📦 Installation (Quick Start)
-```bash
-apt update
-apt install -y python3 python3-pip nginx
+## 📦 Installation
+
+### ⚡ Option 1 — Automated Setup (Recommended)
+
+Run the bootstrap script to fully configure the environment:
+
+```
+chmod +x bootstrap.sh
+./bootstrap.sh
 ```
 
-```bash
-git clone https://github.com/YOUR_USER/Marano_Secure_Access_MSA.git
+This will automatically:
+
+- Install dependencies
+- Fix Easy-RSA path
+- Initialize PKI (CA, server cert, CRL)
+- Configure admin credentials and MFA
+- Prepare the application environment
+
+
+After completion:
+```
+cd Marano_Secure_Access_MSA
+source venv/bin/activate
+python3 app.py
+```
+
+Access:
+```
+http://<SERVER_IP>:8080
+```
+
+---
+
+### 🛠️ Option 2 — Manual Setup
+
+#### Install dependencies
+```
+apt update
+apt install -y python3 python3-pip python3.13-venv easy-rsa nginx git
+```
+#### Clone repository
+```
+git clone https://github.com/r0s3mbr1ck/Marano_Secure_Access_MSA.git
 cd Marano_Secure_Access_MSA
 ```
 
-```bash
+#### Python environment
+```
 python3 -m venv venv
 source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-```bash
+#### 🔧 Easy-RSA Fix (Debian)
+```
+mkdir -p /etc/openvpn
+ln -s /usr/share/easy-rsa /etc/openvpn/easy-rsa
+```
+
+#### 🔐 Initial Setup (Admin + MFA)
+```
+python3 setup_admin.py
+```
+
+#### ▶️ Run the application
+```
 python3 app.py
 ```
 
-Access:
+---
 
+## 🧠 First Access Flow
+
+1. Run bootstrap or manual setup
+
+2. Configure admin credentials and MFA
+
+3. Start the application
+
+4. Login to admin panel
+
+5. Create VPN profiles
+
+6. Deliver access to users
+
+
+---
+
+## 🌐 Access
+
+Local:
+```
 http://127.0.0.1:8080
+```
+
+Network:
+```
+http://<SERVER_IP>:8080
+```
+
+---
+
+## 📱 MFA Login
+
+Use a TOTP app:
+
+- Google Authenticator
+- Microsoft Authenticator
+- Authy
+- Other Authenticator App
+
+
+Scan the QR code or use the generated secret.
 
 
 ---
@@ -131,27 +240,30 @@ http://127.0.0.1:8080
 
 This project does not include automatic setup of:
 
-- OpenVPN server
-- PKI / certificates
 - Network routing (TUN / NAT)
+- Firewall rules
+- Port forwarding / NAT on router
+- Reverse proxy (optional)
+
+Proper VPN functionality depends on correct network configuration.
+
 
 ---
 
 ## 📚 Documentation
-
-### Detailed guides and internal design:
-
-🔐 [`PKI & OpenVPN Setup`](docs/pki_and_openvpn_setup.md)
-
-🧠 [`Architecture`](docs/architecture.md)
-
-🔒 [`Security Model`](docs/security_model.md)
-
-📡 [`Deployment Guide`](docs/deployment.md)
-
-🗂️ [`Registry System`](docs/registry.md)
-
-👤 [`User & Access Flow`](docs/user_flow.md)
+Detailed guides and internal design:  
+  
+🔐 [`PKI & OpenVPN Setup`](docs/pki_and_openvpn_setup.md)  
+  
+🧠 [`Architecture`](docs/architecture.md)  
+  
+🔒 [`Security Model`](docs/security_model.md)  
+  
+📡 [`Deployment Guide`](docs/deployment.md)  
+  
+🗂️ [`Registry System`](docs/registry.md)  
+  
+👤 [`User & Access Flow`](docs/user_flow.md)  
 
 ---
 
@@ -159,6 +271,8 @@ This project does not include automatic setup of:
 ```text
 Marano_Secure_Access_MSA/
 ├── app.py
+├── setup_admin.py
+├── bootstrap.sh
 ├── requirements.txt
 ├── .gitignore
 ├── .env.example
@@ -200,27 +314,26 @@ Marano_Secure_Access_MSA/
 └── pki/             # ignored by git
 ```
 
+
 ---
 
 ## 🚀 Roadmap
 
-⬆️ QR Code for WireGuard
-
-⬆️ Registry → SQLite migration
-
-⬆️ API support
-
-⬆️ RBAC / multi-user roles
-
-⬆️ Zero Trust policies
+- [x] WireGuard QR Code support
+- [ ] Registry → SQLite migration
+- [ ] REST API (automation & integration)
+- [ ] RBAC / multi-user roles
+- [ ] Zero Trust policy enforcement
 
 
 ---
 
 ## ⚠️ Notes
+
 🚩 Designed for self-hosted environments
 
 🚩 Requires networking and PKI knowledge
 
 🚩 Do not expose private keys or sensitive data
 
+---
